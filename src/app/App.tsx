@@ -18,23 +18,30 @@ import { DatabaseScreen } from "./screens/DatabaseScreen";
 import { HomeScreen } from "./screens/HomeScreen";
 import { TeamsScreen } from "./screens/TeamsScreen";
 
-const SCREENS: Record<
-  TabId,
-  { title: string; showSyncPill?: boolean; Screen: () => JSX.Element }
-> = {
-  home: { title: "VGC Champions Vault", showSyncPill: true, Screen: HomeScreen },
-  database: { title: "Meta Database", Screen: DatabaseScreen },
-  teams: { title: "Teams Registry", Screen: TeamsScreen },
-  // AnalyzerScreen is rendered directly in AppShell (needs captureSignal).
-  tools: { title: "Matchup Analyzer", Screen: () => <AnalyzerScreen /> },
+// Screens render directly in AppShell (each takes navigation props);
+// this map only supplies chrome config.
+const SCREENS: Record<TabId, { title: string; showSyncPill?: boolean }> = {
+  home: { title: "VGC Champions Vault", showSyncPill: true },
+  database: { title: "Meta Database" },
+  teams: { title: "Teams Registry" },
+  tools: { title: "Matchup Analyzer" },
 };
 
 function AppShell() {
-  const { activeTab, direction, navigate, openAnalyzer, captureSignal } =
-    useNavigation();
+  const {
+    activeTab,
+    direction,
+    navigate,
+    openAnalyzer,
+    captureSignal,
+    detailRequest,
+    openDatabaseDetail,
+    archetypesSignal,
+    openArchetypes,
+  } = useNavigation();
   const { status, refresh } = useMetaData();
   const persisted = useStoragePersist();
-  const { title, showSyncPill, Screen } = SCREENS[activeTab];
+  const { title, showSyncPill } = SCREENS[activeTab];
 
   // Launched from the OS share sheet: jump straight to the Analyzer with
   // the picker open — the recognition hook consumes the parked screenshot.
@@ -87,8 +94,15 @@ function AppShell() {
         >
           {activeTab === "tools" ? (
             <AnalyzerScreen captureSignal={captureSignal} />
+          ) : activeTab === "database" ? (
+            <DatabaseScreen detailRequest={detailRequest} />
+          ) : activeTab === "teams" ? (
+            <TeamsScreen archetypesSignal={archetypesSignal} />
           ) : (
-            <Screen />
+            <HomeScreen
+              onOpenDetail={openDatabaseDetail}
+              onOpenArchetypes={openArchetypes}
+            />
           )}
         </motion.div>
       </AnimatePresence>

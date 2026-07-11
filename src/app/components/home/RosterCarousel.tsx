@@ -85,7 +85,7 @@ export function RosterCarousel({
         {/* Add-team card */}
         <button
           onClick={onAdd}
-          className="snap-start min-w-[140px] h-[188px] border-2 border-dashed border-muted/40 rounded-xl flex flex-col items-center justify-center text-muted bg-panel/50 transition-all hover:border-muted/70 hover:text-ink flex-shrink-0"
+          className="snap-start min-w-[140px] h-[220px] border-2 border-dashed border-muted/40 rounded-xl flex flex-col items-center justify-center text-muted bg-panel/50 transition-all hover:border-muted/70 hover:text-ink flex-shrink-0"
         >
           <div className="w-10 h-10 rounded-full bg-night flex items-center justify-center mb-2 shadow-inner">
             <Plus size={24} />

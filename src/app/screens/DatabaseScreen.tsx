@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { RefreshCw, Search } from "lucide-react";
 import { useMetaData } from "../../hooks/useMetaData";
 import { usePokemonDetail } from "../../hooks/usePokemonDetail";
@@ -30,12 +30,23 @@ function RowSkeletons() {
   );
 }
 
-export function DatabaseScreen() {
+interface DatabaseScreenProps {
+  /** Deep-link from Home's Meta Pulse (seq bumps per tap). */
+  detailRequest?: { name: string; seq: number } | null;
+}
+
+export function DatabaseScreen({ detailRequest = null }: DatabaseScreenProps) {
   const { status, snapshot, refresh } = useMetaData();
   const { query, setQuery, sortBy, setSortBy, results } = useUsageSearch(
     snapshot?.entries ?? [],
   );
   const [selectedName, setSelectedName] = useState<string | null>(null);
+
+  // Deep-link from Home's Meta Pulse: open this species' sheet directly.
+  useEffect(() => {
+    if (detailRequest) setSelectedName(detailRequest.name);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [detailRequest?.seq]);
   const detailState = usePokemonDetail(selectedName);
   const smogon = useSmogon();
   const [smogonTier, setSmogonTier] = useState<SmogonTierId>("all");

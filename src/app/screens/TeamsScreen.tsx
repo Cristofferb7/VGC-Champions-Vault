@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { useLimitless } from "../../hooks/useLimitless";
 import { useMetaData } from "../../hooks/useMetaData";
 import { useMetaTeams, type RankedTopTeam } from "../../hooks/useMetaTeams";
@@ -10,8 +11,18 @@ import { SegmentedControl } from "../components/teams/SegmentedControl";
 import { TeamBuilder } from "../components/teams/TeamBuilder";
 import { TopTeamList } from "../components/teams/TopTeamList";
 
-export function TeamsScreen() {
+interface TeamsScreenProps {
+  /** Increments when Home's Meta Pulse archetype line is tapped. */
+  archetypesSignal?: number;
+}
+
+export function TeamsScreen({ archetypesSignal = 0 }: TeamsScreenProps) {
   const { view, setView, sortBy, setSortBy, teams, status } = useMetaTeams();
+
+  useEffect(() => {
+    if (archetypesSignal > 0) setView("archetypes");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [archetypesSignal]);
   const { snapshot } = useMetaData();
   const builder = useTeamBuilder();
   const { addRoster } = useRosters();

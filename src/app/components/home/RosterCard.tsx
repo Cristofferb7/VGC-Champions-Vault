@@ -47,7 +47,7 @@ export function RosterCard({
       }}
       {...longPress}
       style={{ WebkitTouchCallout: "none" }}
-      className={`relative snap-start w-[min(72vw,280px)] flex-shrink-0 h-[188px] bg-panel rounded-xl p-3 flex flex-col shadow-md text-left transition-colors border cursor-pointer select-none ${
+      className={`relative snap-start w-[min(72vw,280px)] flex-shrink-0 h-[220px] bg-panel rounded-xl p-3 flex flex-col shadow-md text-left transition-colors border cursor-pointer select-none ${
         isSelected ? "border-aura/60" : "border-white/5 hover:border-white/15"
       }`}
     >
@@ -81,7 +81,7 @@ export function RosterCard({
                     alt={name}
                     title={name}
                     draggable={false}
-                    className="w-12 h-12 object-contain opacity-90"
+                    className="w-14 h-14 object-contain opacity-90"
                     onError={(e) =>
                       (e.currentTarget.style.visibility = "hidden")
                     }

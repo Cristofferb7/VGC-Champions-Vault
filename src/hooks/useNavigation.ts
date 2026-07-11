@@ -30,5 +30,35 @@ export function useNavigation(initialTab: TabId = "home") {
     setCaptureSignal((n) => n + 1);
   }, [goTo]);
 
-  return { activeTab, direction, navigate, openAnalyzer, captureSignal };
+  /** Meta Pulse row tap → Database with this species' sheet open. */
+  const [detailRequest, setDetailRequest] = useState<{
+    name: string;
+    seq: number;
+  } | null>(null);
+  const openDatabaseDetail = useCallback(
+    (name: string) => {
+      goTo("database");
+      setDetailRequest((prev) => ({ name, seq: (prev?.seq ?? 0) + 1 }));
+    },
+    [goTo],
+  );
+
+  /** Meta Pulse archetype tap → Teams with the Archetypes segment active. */
+  const [archetypesSignal, setArchetypesSignal] = useState(0);
+  const openArchetypes = useCallback(() => {
+    goTo("teams");
+    setArchetypesSignal((n) => n + 1);
+  }, [goTo]);
+
+  return {
+    activeTab,
+    direction,
+    navigate,
+    openAnalyzer,
+    captureSignal,
+    detailRequest,
+    openDatabaseDetail,
+    archetypesSignal,
+    openArchetypes,
+  };
 }

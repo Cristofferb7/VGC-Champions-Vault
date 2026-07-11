@@ -4,7 +4,7 @@ Vite 6 + React 18 + TypeScript + Tailwind 4 + motion. Mobile-first "competitive 
 
 ## ➤ CURRENT ASSIGNMENT
 
-**Read `SPRINT_8_HANDOFF.md` and work through it top to bottom.** (Sprint 7 mobile-Home polish passed QA. Sprint 8 = Capacitor 8 Android wrap: APK via CI artifact, native share intent reusing the OCR flow, storage backup, web deploy untouched. The user does NOT use Expo — ignore any app.json/expo instructions he may mention; Capacitor is the decided path.)
+**Read `SPRINT_9_HANDOFF.md` and work through it top to bottom.** (Sprint 8 accepted — APK workflow green, share intent wired; user still owes the on-device test. Sprint 9 = Home dashboard: modest roster-card growth + new Meta Pulse section from cached data to eliminate the remaining dead band. Reminder: no Expo in this project, ever — Capacitor is the native path.)
 
 ## Standing workflow (do not change)
 
