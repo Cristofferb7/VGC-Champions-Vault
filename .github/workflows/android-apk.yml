@@ -1,0 +1,50 @@
+name: Android APK
+
+on:
+  workflow_dispatch: {}
+  release:
+    types: [published]
+
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # Capacitor CLI 8 requires Node >= 22 (local dev machine runs 20 —
+      # cap commands are CI-only unless Node is upgraded, see README).
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      # AGP 8.7 — JDK 17 per the Capacitor 8 template.
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - run: npm ci
+
+      - name: Build web bundle
+        run: npm run build
+
+      - name: Copy web bundle into the native project
+        run: npx cap sync android
+
+      # Self-hosted OCR assets (~29 MB) are runtime-fetched from the
+      # deployed origin on native — never shipped in the APK.
+      - name: Strip OCR assets from APK payload
+        run: rm -rf android/app/src/main/assets/public/tesseract
+
+      - name: Assemble debug APK
+        run: cd android && chmod +x gradlew && ./gradlew assembleDebug --no-daemon
+
+      - name: Report APK size
+        run: ls -lh android/app/build/outputs/apk/debug/app-debug.apk
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: champions-vault-debug-apk
+          path: android/app/build/outputs/apk/debug/app-debug.apk
+          retention-days: 30

@@ -1,3 +1,4 @@
+import { withApiOrigin } from "../config";
 import { similarity } from "./fuzzy";
 
 /**
@@ -77,12 +78,14 @@ export async function recognizeTeamPreview(
 
   // Lazy-load tesseract.js; worker/core/language assets are self-hosted
   // under /tesseract (no CDN dependency) and runtime-cached by the SW so
-  // OCR keeps working offline after first use.
+  // OCR keeps working offline after first use. In the APK these ~29 MB
+  // are stripped from the bundle (android:sync) and fetched from the
+  // deployed origin instead — native OCR needs network on first use.
   const { createWorker, OEM } = await import("tesseract.js");
   const worker = await createWorker("eng", OEM.LSTM_ONLY, {
-    workerPath: "/tesseract/worker.min.js",
-    corePath: "/tesseract/core",
-    langPath: "/tesseract/lang",
+    workerPath: withApiOrigin("/tesseract/worker.min.js"),
+    corePath: withApiOrigin("/tesseract/core"),
+    langPath: withApiOrigin("/tesseract/lang"),
   });
   try {
     const { data } = await worker.recognize(canvas);

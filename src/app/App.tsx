@@ -8,6 +8,7 @@ import {
   clearShareTargetFlag,
   launchedViaShareTarget,
 } from "../lib/shareTarget";
+import { initNativeShareIntent } from "../lib/nativeShare";
 import type { TabId } from "../types";
 import { AppHeader } from "./components/layout/AppHeader";
 import { BottomNav } from "./components/layout/BottomNav";
@@ -37,11 +38,14 @@ function AppShell() {
 
   // Launched from the OS share sheet: jump straight to the Analyzer with
   // the picker open — the recognition hook consumes the parked screenshot.
+  // Two entry points, one flow: the PWA share_target (?shared + SW cache)
+  // and the APK share intent (native listener parks into the same cache).
   useEffect(() => {
     if (launchedViaShareTarget()) {
       clearShareTargetFlag();
       openAnalyzer();
     }
+    initNativeShareIntent(openAnalyzer);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

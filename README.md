@@ -85,17 +85,44 @@ headers and the SPA fallback — no serverless functions needed.
 Lighthouse (prod, 2026-07-11, post v1.5): **Performance 94 · Accessibility 96 ·
 Best Practices 96 · SEO 92** (was perf 88 before the calc chunk went lazy).
 
-## Mobile path (decided 2026-07-11)
+## Mobile (Android APK + PWA — no Expo, ever)
 
-- **Phase 1 (now):** this Vercel web app + installable PWA. Android installs
-  get the OS **share sheet integration** (share a team-preview screenshot →
-  app opens with OCR results, offline-capable after first use).
-- **Phase 2 (later):** Capacitor 8 wrap of this same `dist/` for the App
-  Store, with a native iOS share extension. Prereq already in place: all
-  IndexedDB access goes through the single `src/lib/metaCache.ts` module,
-  so storage can move to SQLite/Preferences without touching screens.
-- **Not doing:** React Native/Expo rewrite — buys nothing for a
-  data/calculator app.
+This project's native path is **Capacitor 8** wrapping the exact same
+`dist/` the web deploy uses. There is no Expo/React Native anywhere —
+ignore any third-party instructions mentioning `app.json` or
+`expo run:android`.
+
+**Path A — get the APK (recommended, no cable, no Android Studio):**
+
+1. GitHub → **Actions** tab → **"Android APK"** workflow → **Run
+   workflow** (or grab the latest green run after a release).
+2. Download the `champions-vault-debug-apk` artifact.
+3. Copy `app-debug.apk` to the phone, tap it, allow "install unknown
+   apps" for your file manager when prompted.
+
+**Path B — cable + local build (optional):** enable Developer Options +
+USB debugging, then `npm run android:run`. Requires a local Android
+SDK **and Node ≥22** (Capacitor CLI 8 refuses Node 20; the web app
+itself still builds on 20).
+
+Notes:
+
+- The APK bundles the web app — boots offline like the PWA. Live data
+  (`/pika`, weekly snapshots) is fetched from the deployed origin;
+  bundled snapshot copies serve as the offline fallback. OCR assets
+  (~29 MB) are runtime-fetched, never packaged, keeping the APK lean.
+- **Share sheet:** the APK registers for `image/*` shares (native
+  intent) and feeds the same OCR flow as the PWA's `share_target`. With
+  both installed you'll see two "Champions Vault" share entries — that's
+  expected.
+- Rosters are mirrored to native Preferences as an eviction-proof
+  backup; IndexedDB stays the primary store.
+- Debug APK only. A signed release (`keytool` keystore + Gradle signing
+  config + Play submission) is deliberately deferred: keys should never
+  be generated in CI, and Play Store needs the sprite IP decision
+  (SPRINT_4 §2) resolved first.
+- iOS: separate sprint — needs a Mac signing setup, Apple dev account,
+  and a Share Extension target.
 
 ## Screens
 

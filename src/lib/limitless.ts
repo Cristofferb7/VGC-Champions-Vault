@@ -1,5 +1,6 @@
 import { metaCache } from "./metaCache";
 import { normalizeSpeciesName } from "./smogon";
+import { fetchSnapshot } from "./snapshotFetch";
 
 /**
  * Client for the repo-committed Limitless archetype snapshot
@@ -42,7 +43,7 @@ const CACHE_KEY = "limitless:reg-mb";
 
 export async function loadLimitless(): Promise<LimitlessSnapshot | null> {
   try {
-    const res = await fetch("/snapshots/limitless/reg-mb.json");
+    const res = await fetchSnapshot("/snapshots/limitless/reg-mb.json");
     if (!res.ok) throw new Error(String(res.status));
     const snap = (await res.json()) as LimitlessSnapshot;
     await metaCache.setSmogonMonth(CACHE_KEY, snap).catch(() => {});

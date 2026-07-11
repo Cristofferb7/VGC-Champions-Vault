@@ -1,4 +1,5 @@
 import { metaCache } from "./metaCache";
+import { fetchSnapshot } from "./snapshotFetch";
 
 /**
  * Client for the repo-committed monthly Smogon snapshots
@@ -66,8 +67,9 @@ export function normalizeSpeciesName(name: string): string {
 }
 
 async function fetchJson<T>(path: string): Promise<T> {
-  const res = await fetch(path);
-  if (!res.ok) throw new Error(`${res.status} ${path}`);
+  // Deployed-origin first, bundled copy second inside the APK (on web
+  // this is a plain same-origin fetch) — see snapshotFetch.
+  const res = await fetchSnapshot(path);
   return res.json() as Promise<T>;
 }
 

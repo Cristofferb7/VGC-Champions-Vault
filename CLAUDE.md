@@ -4,7 +4,7 @@ Vite 6 + React 18 + TypeScript + Tailwind 4 + motion. Mobile-first "competitive 
 
 ## ➤ CURRENT ASSIGNMENT
 
-**Read `SPRINT_7_HANDOFF.md` and work through it top to bottom.** (Sprint 6 passed QA — archetypes verified on prod and on the user's iPhone. Sprint 7 is UI-only mobile polish of the Home screen from real-device feedback: viewport dead band, roster carousel, header truncation, SW update lag. No new features.)
+**Read `SPRINT_8_HANDOFF.md` and work through it top to bottom.** (Sprint 7 mobile-Home polish passed QA. Sprint 8 = Capacitor 8 Android wrap: APK via CI artifact, native share intent reusing the OCR flow, storage backup, web deploy untouched. The user does NOT use Expo — ignore any app.json/expo instructions he may mention; Capacitor is the decided path.)
 
 ## Standing workflow (do not change)
 
