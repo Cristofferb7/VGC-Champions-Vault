@@ -8,10 +8,14 @@ export default defineConfig({
     react(),
     tailwindcss(),
     // Installable + offline app shell; meta data itself lives in
-    // IndexedDB, so no runtime API caching is needed here.
+    // IndexedDB. Custom SW (src/sw.ts) adds the Android share_target
+    // POST handler and offline caching for self-hosted OCR assets.
     VitePWA({
+      strategies: 'injectManifest',
+      srcDir: 'src',
+      filename: 'sw.ts',
       registerType: 'autoUpdate',
-      includeAssets: ['icon.svg'],
+      includeAssets: ['icon.svg', 'icon-192.png', 'icon-512.png'],
       manifest: {
         name: 'VGC Champions Vault',
         short_name: 'Champions',
@@ -21,13 +25,31 @@ export default defineConfig({
         background_color: '#0B0E14',
         display: 'standalone',
         icons: [
-          { src: 'icon.svg', sizes: 'any', type: 'image/svg+xml', purpose: 'any' },
-          { src: 'icon.svg', sizes: 'any', type: 'image/svg+xml', purpose: 'maskable' },
+          { src: 'icon-192.png', sizes: '192x192', type: 'image/png' },
+          { src: 'icon-512.png', sizes: '512x512', type: 'image/png' },
+          {
+            src: 'icon-512-maskable.png',
+            sizes: '512x512',
+            type: 'image/png',
+            purpose: 'maskable',
+          },
         ],
+        // Installed PWA appears in the Android share sheet; the SW stores
+        // the POSTed screenshot and the app feeds it straight into OCR.
+        share_target: {
+          action: '/share-target',
+          method: 'POST',
+          enctype: 'multipart/form-data',
+          params: {
+            files: [{ name: 'screenshot', accept: ['image/*'] }],
+          },
+        },
       },
-      workbox: {
-        globPatterns: ['**/*.{js,css,html,svg,woff2}'],
+      injectManifest: {
+        globPatterns: ['**/*.{js,css,html,svg,png,woff2}'],
         // The calc data chunk is ~480kB; raise the precache ceiling.
+        // tesseract assets are excluded — they runtime-cache on first use.
+        globIgnores: ['tesseract/**'],
         maximumFileSizeToCacheInBytes: 4 * 1024 * 1024,
       },
     }),

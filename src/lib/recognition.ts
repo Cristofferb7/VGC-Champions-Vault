@@ -75,9 +75,15 @@ export async function recognizeTeamPreview(
 ): Promise<RecognizedSlot[]> {
   const canvas = await imageToCanvas(file);
 
-  // Lazy-load tesseract.js (wasm + eng data fetched on first use).
-  const { createWorker } = await import("tesseract.js");
-  const worker = await createWorker("eng");
+  // Lazy-load tesseract.js; worker/core/language assets are self-hosted
+  // under /tesseract (no CDN dependency) and runtime-cached by the SW so
+  // OCR keeps working offline after first use.
+  const { createWorker, OEM } = await import("tesseract.js");
+  const worker = await createWorker("eng", OEM.LSTM_ONLY, {
+    workerPath: "/tesseract/worker.min.js",
+    corePath: "/tesseract/core",
+    langPath: "/tesseract/lang",
+  });
   try {
     const { data } = await worker.recognize(canvas);
     const lines = data.text

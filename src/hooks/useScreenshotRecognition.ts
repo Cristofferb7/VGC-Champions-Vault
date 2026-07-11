@@ -3,6 +3,7 @@ import {
   recognizeTeamPreview,
   type RecognizedSlot,
 } from "../lib/recognition";
+import { consumeSharedScreenshot } from "../lib/shareTarget";
 
 type RecognitionStatus = "idle" | "processing" | "done" | "error";
 
@@ -34,6 +35,16 @@ export function useScreenshotRecognition(
     },
     [candidates, onRecognized],
   );
+
+  // Screenshot handed over by the OS share sheet (Android share_target):
+  // the SW parked it in Cache Storage; pick it up once the picker opens.
+  useEffect(() => {
+    if (!listenForPaste || candidates.length === 0) return;
+    void consumeSharedScreenshot().then((blob) => {
+      if (blob) void processImage(blob);
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [listenForPaste, candidates.length]);
 
   useEffect(() => {
     if (!listenForPaste) return;

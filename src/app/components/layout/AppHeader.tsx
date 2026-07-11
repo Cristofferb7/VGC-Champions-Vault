@@ -16,6 +16,8 @@ interface AppHeaderProps {
   title: string;
   /** Real cache state drives the pill (Home screen only). */
   syncStatus?: SyncStatus;
+  /** navigator.storage.persist() result — surfaced in the pill tooltip. */
+  persistedStorage?: boolean | null;
   /** Bell dot = "your data needs attention", not decoration. */
   showAlert: boolean;
   /** Tapping the bell while alerted retries the sync. */
@@ -25,15 +27,23 @@ interface AppHeaderProps {
 export function AppHeader({
   title,
   syncStatus,
+  persistedStorage,
   showAlert,
   onAlertTap,
 }: AppHeaderProps) {
   const pill = syncStatus ? PILL_STATES[syncStatus] : null;
+  const persistNote =
+    persistedStorage == null
+      ? "persistent storage: unknown"
+      : persistedStorage
+        ? "persistent storage: granted (data survives storage pressure)"
+        : "persistent storage: not granted (browser may evict offline data)";
 
   return (
     <header className="sticky top-0 z-50 bg-night/95 backdrop-blur-md border-b border-panel h-14 px-4 flex items-center justify-between">
       {pill ? (
         <div
+          title={`Meta data cache state · ${persistNote}`}
           className={`flex items-center space-x-1 px-2 py-1 rounded-full border z-10 ${pill.tone}`}
         >
           <pill.Icon size={12} className={pill.spin ? "animate-spin" : ""} />
