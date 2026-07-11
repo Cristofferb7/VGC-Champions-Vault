@@ -51,6 +51,31 @@ Counters** matrices, and **lead usage**.
 - Season 4 rollover (Sept 2, 2026): update `src/config.ts` AND the format
   constant in the script.
 
+## Archetype layer (v2, Limitless)
+
+Real tournament team sheets from the keyless Limitless API
+(play.limitlesstcg.com) power the Archetypes tab and the analyzer's
+"closest archetype" readout.
+
+- `scripts/build-limitless-snapshot.mjs` runs weekly
+  (`.github/workflows/limitless-snapshot.yml`, Mondays): pulls completed
+  Reg M-B tournaments (≥12 players), appends team sheets to cumulative
+  state in `data/limitless/`, re-clusters, and ships a clusters-only
+  snapshot (~6 KB) to `public/snapshots/limitless/`.
+- **Clustering, honestly described:** multi-hot species vectors (species
+  on ≥3 teams), deterministic k-means++ with k picked by silhouette
+  (4–10), clusters named by their most over-represented common species
+  (lift, ≥50% in-cluster frequency), <5-team clusters fold into "Other".
+  Limitations: silhouette is weak on binary high-dim data (~0.13), the
+  largest cluster is a goodstuff catch-all, and mega forms are derived
+  from held stones because Limitless stores base names. First run:
+  6,946 sheets / 111 tournaments → 5 archetypes.
+- The analyzer matches an entered opponent team to cluster centroids via
+  cosine similarity; below 0.45 (calibrated against real members) it says
+  "No clear archetype match" rather than force-fitting. A matched
+  cluster's carry frequencies also blend into Likely Brings (documented
+  ×0.5 weight in `bringLikelihood.ts`).
+
 ## Deploy
 
 `npx vercel deploy --prod` from the repo root (project: `champions-analyzer`,

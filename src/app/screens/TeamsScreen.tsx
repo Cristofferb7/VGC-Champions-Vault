@@ -1,7 +1,10 @@
+import { useLimitless } from "../../hooks/useLimitless";
 import { useMetaData } from "../../hooks/useMetaData";
 import { useMetaTeams, type RankedTopTeam } from "../../hooks/useMetaTeams";
 import { useRosters } from "../../hooks/useRosters";
 import { useTeamBuilder } from "../../hooks/useTeamBuilder";
+import type { ArchetypeCluster } from "../../lib/limitless";
+import { ArchetypeList } from "../components/teams/ArchetypeList";
 import { FilterPills } from "../components/teams/FilterPills";
 import { SegmentedControl } from "../components/teams/SegmentedControl";
 import { TeamBuilder } from "../components/teams/TeamBuilder";
@@ -13,8 +16,18 @@ export function TeamsScreen() {
   const builder = useTeamBuilder();
   const { addRoster } = useRosters();
 
+  const limitless = useLimitless();
+
   const cloneTeam = (team: RankedTopTeam) => {
     builder.loadDraft(`${team.author.toUpperCase()} CLONE`, team.species);
+    setView("builder");
+  };
+
+  const cloneCore = (cluster: ArchetypeCluster) => {
+    builder.loadDraft(
+      `${cluster.name.split(" + ")[0].toUpperCase()} CORE`,
+      cluster.core.slice(0, 6).map((member) => member.name),
+    );
     setView("builder");
   };
 
@@ -31,6 +44,8 @@ export function TeamsScreen() {
             onClone={cloneTeam}
           />
         </>
+      ) : view === "archetypes" ? (
+        <ArchetypeList snapshot={limitless} onCloneCore={cloneCore} />
       ) : (
         <TeamBuilder
           builder={builder}

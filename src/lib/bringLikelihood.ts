@@ -12,6 +12,13 @@ export interface BringEstimate {
 
 /** Boost per teammate co-occurrence — a shape prior, not a fitted weight. */
 const SYNERGY_BOOST = 0.15;
+/**
+ * Blend weight for archetype evidence (sprint 6): when the opponent team
+ * confidently matches a tournament cluster, a species carried by (say)
+ * 80% of that cluster's teams gets up to a 1 + 0.5×0.8 = 1.4× boost.
+ * A shape prior like SYNERGY_BOOST — documented, not fitted.
+ */
+const ARCHETYPE_BLEND_WEIGHT = 0.5;
 
 /**
  * Rank which 4 of the opponent's 6 they most likely bring (doubles).
@@ -24,7 +31,15 @@ export function computeBringLikelihood(
   team: string[],
   entries: UsageEntry[],
   details: Record<string, PokemonDetail | null>,
+  /** name(normalized-ish) → in-cluster carry frequency % from Limitless. */
+  archetypeFreq?: Record<string, number>,
 ): BringEstimate[] {
+  const archetypeLookup = new Map(
+    Object.entries(archetypeFreq ?? {}).map(([name, freq]) => [
+      name.toLowerCase().replace(/[^a-z0-9]/g, ""),
+      freq,
+    ]),
+  );
   const gamesByName = new Map(
     entries.map((entry) => [
       entry.name.toLowerCase(),
@@ -51,7 +66,17 @@ export function computeBringLikelihood(
         ),
     ).length;
 
-    return { name, games, synergies, score: games * (1 + SYNERGY_BOOST * synergies) };
+    const clusterFreq =
+      archetypeLookup.get(name.toLowerCase().replace(/[^a-z0-9]/g, "")) ?? 0;
+    return {
+      name,
+      games,
+      synergies,
+      score:
+        games *
+        (1 + SYNERGY_BOOST * synergies) *
+        (1 + ARCHETYPE_BLEND_WEIGHT * (clusterFreq / 100)),
+    };
   });
 
   const total = scored.reduce((sum, entry) => sum + entry.score, 0) || 1;

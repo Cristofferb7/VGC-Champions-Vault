@@ -1,11 +1,14 @@
 import { useCallback, useEffect, useMemo } from "react";
 import { Camera, Pencil } from "lucide-react";
 import { useBringLikelihood } from "../../hooks/useBringLikelihood";
+import { useLimitless } from "../../hooks/useLimitless";
+import { matchArchetype } from "../../lib/limitless";
 import { useMatchupAnalysis } from "../../hooks/useMatchupAnalysis";
 import { useMetaData } from "../../hooks/useMetaData";
 import { usePokemonDetail } from "../../hooks/usePokemonDetail";
 import { useScreenshotRecognition } from "../../hooks/useScreenshotRecognition";
 import type { RecognizedSlot } from "../../lib/recognition";
+import { ArchetypeChip } from "../components/analyzer/ArchetypeChip";
 import { BringPanel } from "../components/analyzer/BringPanel";
 import { MatchupDetail } from "../components/analyzer/MatchupDetail";
 import { MatchupGrid } from "../components/analyzer/MatchupGrid";
@@ -52,7 +55,22 @@ export function AnalyzerScreen({ captureSignal = 0 }: AnalyzerScreenProps) {
     applyRecognition,
     pickerOpen, // ⌘V works whenever opponent entry is open
   );
-  const brings = useBringLikelihood(opponentTeam, snapshot?.entries ?? []);
+  const limitless = useLimitless();
+  const archetypeMatch = useMemo(
+    () =>
+      opponentTeam.length === 6 && limitless
+        ? matchArchetype(
+            opponentTeam.map((poke) => poke.name),
+            limitless.clusters,
+          )
+        : null,
+    [opponentTeam, limitless],
+  );
+  const brings = useBringLikelihood(
+    opponentTeam,
+    snapshot?.entries ?? [],
+    archetypeMatch?.cluster.centroid,
+  );
 
   useEffect(() => {
     if (captureSignal > 0) openPicker();
@@ -135,7 +153,16 @@ export function AnalyzerScreen({ captureSignal = 0 }: AnalyzerScreenProps) {
       </section>
 
       {brings.complete && (
-        <BringPanel estimates={brings.estimates} loading={brings.loading} />
+        <section>
+          {limitless && (
+            <ArchetypeChip
+              match={archetypeMatch}
+              opponentTeam={opponentTeam}
+              teamCount={limitless.teamCount}
+            />
+          )}
+          <BringPanel estimates={brings.estimates} loading={brings.loading} />
+        </section>
       )}
 
       <BottomSheet

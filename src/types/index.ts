@@ -129,6 +129,6 @@ export interface PokemonDetail {
   fetchedAt: number;
 }
 
-export type TeamsView = "top" | "builder";
+export type TeamsView = "top" | "archetypes" | "builder";
 
 export type TeamsSort = "mostTeams" | "winRate" | "record";

@@ -2,7 +2,8 @@ import type { TeamsView } from "../../../types";
 
 const SEGMENTS: Array<{ id: TeamsView; label: string }> = [
   { id: "top", label: "Top Teams" },
-  { id: "builder", label: "Team Builder" },
+  { id: "archetypes", label: "Archetypes" },
+  { id: "builder", label: "Builder" },
 ];
 
 interface SegmentedControlProps {

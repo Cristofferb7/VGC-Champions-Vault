@@ -152,9 +152,26 @@ export function DatabaseScreen() {
           >
             Pikalytics
           </a>
-          {snapshot?.dataDate && ` · snapshot ${snapshot.dataDate}`} · unofficial;
-          not affiliated with Nintendo, Creatures, GAME FREAK, or The Pokémon
-          Company
+          {snapshot?.dataDate && ` · snapshot ${snapshot.dataDate}`} ·{" "}
+          <a
+            href="https://www.smogon.com/stats/"
+            target="_blank"
+            rel="noreferrer"
+            className="text-aura underline underline-offset-2"
+          >
+            Smogon
+          </a>{" "}
+          ·{" "}
+          <a
+            href="https://play.limitlesstcg.com"
+            target="_blank"
+            rel="noreferrer"
+            className="text-aura underline underline-offset-2"
+          >
+            Limitless
+          </a>{" "}
+          · unofficial; not affiliated with Nintendo, Creatures, GAME FREAK, or
+          The Pokémon Company
         </p>
       </footer>
 

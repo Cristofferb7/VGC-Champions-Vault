@@ -10,6 +10,8 @@ import type { Pokemon, PokemonDetail, UsageEntry } from "../types";
 export function useBringLikelihood(
   opponentTeam: Pokemon[],
   entries: UsageEntry[],
+  /** Matched archetype's centroid (species → carry %); blends into scores. */
+  archetypeFreq?: Record<string, number>,
 ) {
   const [estimates, setEstimates] = useState<BringEstimate[] | null>(null);
   const [loading, setLoading] = useState(false);
@@ -37,6 +39,7 @@ export function useBringLikelihood(
           opponentTeam.map((poke) => poke.name),
           entries,
           details,
+          archetypeFreq,
         ),
       );
       setLoading(false);
@@ -44,7 +47,7 @@ export function useBringLikelihood(
     return () => {
       cancelled = true;
     };
-  }, [opponentTeam, entries, complete]);
+  }, [opponentTeam, entries, complete, archetypeFreq]);
 
   return { estimates, loading, complete };
 }

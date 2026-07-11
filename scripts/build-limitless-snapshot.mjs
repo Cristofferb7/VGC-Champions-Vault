@@ -240,10 +240,13 @@ if (teams.length >= 30) {
       if (distinctive.length >= 2) break;
       if (!distinctive.some((d) => d.name === c.name)) distinctive.push(c);
     }
-    const placingPctls = memberIdx.map(
+    // Placing can be null (drops) — such sheets still count for clustering
+    // but are excluded from placing stats and examples.
+    const placed = memberIdx.filter((i) => typeof teams[i].placing === "number");
+    const placingPctls = placed.map(
       (i) => 1 - (teams[i].placing - 1) / Math.max(1, teams[i].players - 1),
     );
-    const examples = memberIdx
+    const examples = placed
       .map((i) => teams[i])
       .sort((a, b) => a.placing - b.placing)
       .slice(0, 3)
@@ -253,7 +256,9 @@ if (teams.length >= 30) {
       name: distinctive.map((s) => s.name).join(" + ") || `Cluster ${j}`,
       teams: memberIdx.length,
       sharePct: pct(memberIdx.length / teams.length),
-      avgPlacingPctl: pct(placingPctls.reduce((a, b) => a + b, 0) / placingPctls.length),
+      avgPlacingPctl: placingPctls.length
+        ? pct(placingPctls.reduce((a, b) => a + b, 0) / placingPctls.length)
+        : null,
       core: core.map(({ name, freq }) => ({ name, freq: pct(freq) })),
       // Sparse centroid for in-app cosine similarity (freq ≥ 5%).
       centroid: Object.fromEntries(
