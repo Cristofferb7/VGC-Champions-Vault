@@ -4,7 +4,7 @@ Vite 6 + React 18 + TypeScript + Tailwind 4 + motion. Mobile-first "competitive 
 
 ## ➤ CURRENT ASSIGNMENT
 
-**Read `SPRINT_4_HANDOFF.md` and work through it top to bottom.** Step 0 (visual verification of the round-3 features) is mandatory before anything else — report pass/fail per checklist item.
+**Read `SPRINT_5_HANDOFF.md` and work through it top to bottom.** (Sprint 4 shipped and passed Cowork QA on the live URL — one defect carried into Sprint 5 item 1: sheet drag-dismiss ignores mouse pointers.)
 
 ## Standing workflow (do not change)
 
