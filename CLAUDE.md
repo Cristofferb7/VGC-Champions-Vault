@@ -4,7 +4,7 @@ Vite 6 + React 18 + TypeScript + Tailwind 4 + motion. Mobile-first "competitive 
 
 ## ➤ CURRENT ASSIGNMENT
 
-**Read `SPRINT_5_HANDOFF.md` and work through it top to bottom.** (Sprint 4 shipped and passed Cowork QA on the live URL — one defect carried into Sprint 5 item 1: sheet drag-dismiss ignores mouse pointers.)
+**Read `SPRINT_6_HANDOFF.md` and work through it top to bottom.** (Sprint 5 passed Cowork QA on prod in full — drag fix, Smogon layer, matrix evidence dots all verified. Sprint 6 = QA nits + Limitless ingest + archetype clustering.)
 
 ## Standing workflow (do not change)
 

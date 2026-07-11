@@ -52,6 +52,14 @@ export function formatMultiplier(value: number): string {
  * data carry `real` so the grid can tag them and the detail sheet can
  * explain the evidence.
  */
+/**
+ * Two evidence thresholds (QA sprint 6): the snapshot keeps C&C rows at
+ * n≥20 so the Database sheet can DISPLAY them with the sample visible, but
+ * overriding a matrix verdict demands n≥100 — a 20-encounter verdict is
+ * noise dressed up as data.
+ */
+const MATRIX_OVERRIDE_MIN_N = 100;
+
 export function blendWithRealData(
   base: MatchupCellResult,
   mine: Pokemon,
@@ -61,10 +69,18 @@ export function blendWithRealData(
   // counters(X) lists what beats X.
   const mineBeatsTheirs = smogon
     .counters(theirs.name)
-    .find((c) => c.name.toUpperCase() === mine.name.toUpperCase());
+    .find(
+      (c) =>
+        c.name.toUpperCase() === mine.name.toUpperCase() &&
+        c.n >= MATRIX_OVERRIDE_MIN_N,
+    );
   const theirsBeatsMine = smogon
     .counters(mine.name)
-    .find((c) => c.name.toUpperCase() === theirs.name.toUpperCase());
+    .find(
+      (c) =>
+        c.name.toUpperCase() === theirs.name.toUpperCase() &&
+        c.n >= MATRIX_OVERRIDE_MIN_N,
+    );
 
   const winner =
     (mineBeatsTheirs?.score ?? 0) >= (theirsBeatsMine?.score ?? 0)

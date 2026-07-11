@@ -92,6 +92,23 @@ export function SmogonSections({ name, tier, store }: SmogonSectionsProps) {
         </section>
       )}
 
+      {/* Lead usage — early in the sheet so it's actually seen (QA s6
+          couldn't find it at the bottom). Hidden entirely when the leads
+          report has no row for this species. */}
+      {data.leadPct !== null && (
+        <section className="mb-4 bg-night/60 rounded-lg border border-white/5 px-3 py-2">
+          <h3 className="text-[9px] font-bold uppercase tracking-widest text-muted mb-1">
+            Lead Usage <SourceTag label={srcLabel} />
+          </h3>
+          <p className="text-[11px] font-mono font-bold text-ink">
+            {data.leadPct.toFixed(1)}%{" "}
+            <span className="text-muted font-normal">
+              of lead slots (doubles: front two)
+            </span>
+          </p>
+        </section>
+      )}
+
       {/* Spread distribution — the thing Pikalytics' API doesn't expose */}
       {data.spreads.length > 0 && (
         <section className="mb-4">
@@ -166,20 +183,6 @@ export function SmogonSections({ name, tier, store }: SmogonSectionsProps) {
         </section>
       )}
 
-      {/* Lead usage — honest at last: real leads report exists for this format */}
-      {data.leadPct !== null && (
-        <section className="mb-4 bg-night/60 rounded-lg border border-white/5 px-3 py-2">
-          <h3 className="text-[9px] font-bold uppercase tracking-widest text-muted mb-1">
-            Lead Usage <SourceTag label={srcLabel} />
-          </h3>
-          <p className="text-[11px] font-mono font-bold text-ink">
-            {data.leadPct.toFixed(1)}%{" "}
-            <span className="text-muted font-normal">
-              of lead slots (doubles: front two)
-            </span>
-          </p>
-        </section>
-      )}
     </>
   );
 }

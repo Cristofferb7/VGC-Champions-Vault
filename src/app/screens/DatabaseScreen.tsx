@@ -3,6 +3,7 @@ import { RefreshCw, Search } from "lucide-react";
 import { useMetaData } from "../../hooks/useMetaData";
 import { usePokemonDetail } from "../../hooks/usePokemonDetail";
 import { useSmogon } from "../../hooks/useSmogon";
+import { useScrollEdges } from "../../hooks/useScrollEdges";
 import { useUsageSearch, type UsageSort } from "../../hooks/useUsageSearch";
 import { TIER_LABELS, type SmogonTierId } from "../../lib/smogon";
 import { PokemonDetailSheet } from "../components/database/PokemonDetailSheet";
@@ -39,6 +40,8 @@ export function DatabaseScreen() {
   const smogon = useSmogon();
   const [smogonTier, setSmogonTier] = useState<SmogonTierId>("all");
   const hasSmogon = (smogon?.months.length ?? 0) > 0;
+  const { ref: pillsRef, atEnd: pillsAtEnd } =
+    useScrollEdges<HTMLDivElement>();
 
   return (
     <main className="flex-1 flex flex-col overflow-y-auto px-4">
@@ -56,8 +59,15 @@ export function DatabaseScreen() {
         />
       </div>
 
-      {/* Sort pills */}
-      <div className="mt-4 mb-2 flex space-x-2 overflow-x-auto scrollbar-hide pb-1">
+      {/* Sort pills (right fade = "more pills" scroll affordance, QA s6) */}
+      <div className="relative">
+        {!pillsAtEnd && (
+          <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-night to-transparent pointer-events-none z-10" />
+        )}
+      <div
+        ref={pillsRef}
+        className="mt-4 mb-2 flex space-x-2 overflow-x-auto scrollbar-hide pb-1"
+      >
         {SORTS.map(({ id, label }) => (
           <button
             key={id}
@@ -86,9 +96,11 @@ export function DatabaseScreen() {
                   : "bg-panel text-muted border-white/5 hover:border-white/20"
               }`}
             >
-              SD {TIER_LABELS[tier]}
+              {/* Short label — the long TIER_LABELS clip in this row (QA). */}
+              SD {tier === "all" ? "All ladder" : "Top ladder"}
             </button>
           ))}
+      </div>
       </div>
 
       {/* Usage list */}
