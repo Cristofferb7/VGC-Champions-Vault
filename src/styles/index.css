@@ -1,0 +1,81 @@
+@import "tailwindcss";
+
+/*
+ * Design tokens lifted from the Figma Make export ("competitive HUD" palette).
+ * Semantic names map 1:1 to the hex values used throughout the mockups.
+ */
+@theme {
+  --color-night: #0b0e14; /* app background        (#0B0E14) */
+  --color-panel: #1a202c; /* card / surface        (#1A202C) */
+  --color-ink: #e2e8f0; /*   primary text          (#E2E8F0) */
+  --color-muted: #8b949e; /* secondary text        (#8B949E) */
+  --color-aura: #38bdf8; /*  accent blue           (#38BDF8) */
+  --color-win: #10b981; /*   positive / Good       (#10B981) */
+  --color-loss: #ef4444; /*  negative / Bad        (#EF4444) */
+  --color-warn: #f59e0b; /*  warning amber         (#F59E0B) */
+}
+
+@layer base {
+  html,
+  body,
+  #root {
+    height: 100%;
+    margin: 0;
+  }
+
+  body {
+    @apply bg-night text-ink font-sans antialiased;
+  }
+
+  /* Desktop: soft ambient glow behind the centered phone column so the
+     wide-viewport experience reads as intentional (portfolio piece). */
+  @media (min-width: 431px) {
+    body {
+      background:
+        radial-gradient(
+          60vw 50vh at 20% 0%,
+          rgba(56, 189, 248, 0.07),
+          transparent 60%
+        ),
+        radial-gradient(
+          50vw 60vh at 85% 100%,
+          rgba(139, 92, 246, 0.07),
+          transparent 60%
+        ),
+        #06080d;
+    }
+  }
+}
+
+/* Hide scrollbars on horizontal carousels while keeping them scrollable */
+@utility scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* Respect the home-indicator area on notched phones */
+@utility pb-safe {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* Animated holographic border used by the Active Team hero card */
+@keyframes holographic {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+@utility animate-holo {
+  background-size: 200% 200%;
+  animation: holographic 4s ease infinite;
+}

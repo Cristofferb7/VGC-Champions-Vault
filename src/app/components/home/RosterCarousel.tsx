@@ -1,0 +1,82 @@
+import { useState } from "react";
+import { Plus } from "lucide-react";
+import type { Roster } from "../../../types";
+import { RosterCard } from "./RosterCard";
+
+interface RosterCarouselProps {
+  rosters: Roster[];
+  selectedId: number;
+  onSelect: (id: number) => void;
+  onAdd: () => void;
+  onDuplicate: (id: number) => void;
+  onDelete: (id: number) => void;
+}
+
+export function RosterCarousel({
+  rosters,
+  selectedId,
+  onSelect,
+  onAdd,
+  onDuplicate,
+  onDelete,
+}: RosterCarouselProps) {
+  const [menuRosterId, setMenuRosterId] = useState<number | null>(null);
+
+  return (
+    <section>
+      <h2 className="text-xs font-semibold tracking-wider text-muted uppercase mb-4">
+        Your Rosters{" "}
+        <span className="text-[10px] normal-case tracking-normal ml-1 pointer-fine:hidden">
+          (Long press to edit)
+        </span>
+        <span className="text-[10px] normal-case tracking-normal ml-1 pointer-coarse:hidden">
+          (Right-click to edit)
+        </span>
+      </h2>
+
+      {/* Horizontal carousel */}
+      <div className="flex space-x-4 overflow-x-auto pb-4 scrollbar-hide snap-x pr-4">
+        {rosters.map((roster) => (
+          <RosterCard
+            key={roster.id}
+            roster={roster}
+            isSelected={roster.id === selectedId}
+            menuOpen={menuRosterId === roster.id}
+            onSelect={() => onSelect(roster.id)}
+            onOpenMenu={() => setMenuRosterId(roster.id)}
+            onCloseMenu={() => setMenuRosterId(null)}
+            onDuplicate={() => {
+              onDuplicate(roster.id);
+              setMenuRosterId(null);
+            }}
+            onDelete={() => {
+              onDelete(roster.id);
+              setMenuRosterId(null);
+            }}
+          />
+        ))}
+
+        {/* Add-team card */}
+        <button
+          onClick={onAdd}
+          className="snap-start min-w-[140px] h-[110px] border-2 border-dashed border-muted/40 rounded-xl flex flex-col items-center justify-center text-muted bg-panel/50 transition-all hover:border-muted/70 hover:text-ink flex-shrink-0"
+        >
+          <div className="w-10 h-10 rounded-full bg-night flex items-center justify-center mb-2 shadow-inner">
+            <Plus size={24} />
+          </div>
+          <span className="text-[10px] font-bold uppercase tracking-wider">
+            New Team
+          </span>
+        </button>
+      </div>
+
+      {/* Click-away layer for the edit menu */}
+      {menuRosterId !== null && (
+        <div
+          className="fixed inset-0 z-20"
+          onClick={() => setMenuRosterId(null)}
+        />
+      )}
+    </section>
+  );
+}
