@@ -110,13 +110,21 @@ export function MatchupGrid({
                   <button
                     key={col}
                     onClick={() => onSelectCell(row, col)}
-                    className={`h-11 rounded-md border flex items-center justify-center transition-all ${
+                    className={`relative h-11 rounded-md border flex items-center justify-center transition-all ${
                       VERDICT_STYLES[cell.verdict]
                     } ${isSelected ? "ring-1 ring-aura border-aura/60" : ""}`}
                   >
                     <span className="text-[9px] font-bold uppercase tracking-wider">
                       {cell.verdict}
                     </span>
+                    {/* Dot = verdict backed by real ladder C&C data, not
+                        type math — explained in the cell detail sheet. */}
+                    {cell.real && (
+                      <span
+                        className="absolute top-1 right-1 w-1.5 h-1.5 rounded-full bg-aura shadow-[0_0_4px_rgba(56,189,248,0.9)]"
+                        aria-label="Backed by real matchup data"
+                      />
+                    )}
                   </button>
                 );
               })}

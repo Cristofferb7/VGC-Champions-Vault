@@ -51,12 +51,26 @@ export interface TeamWeakness {
 
 export type MatchupVerdict = "Good" | "Bad" | "Neutral";
 
+/** Real ladder matchup evidence (Smogon Checks & Counters). */
+export interface RealMatchupSignal {
+  /** Which side the data says reliably wins the pairing. */
+  favors: "mine" | "theirs";
+  /** KO-or-forced-switch rate of the losing side, 0–100. */
+  p: number;
+  /** Weighted encounter sample behind the number. */
+  n: number;
+  /** Smogon's p − 4d confidence score, 0–100. */
+  score: number;
+}
+
 export interface MatchupCellResult {
   verdict: MatchupVerdict;
   /** Best offensive type multiplier of the user's Pokémon vs the opponent's. */
   myEdge: number;
   /** Best offensive type multiplier of the opponent's Pokémon vs the user's. */
   theirEdge: number;
+  /** Present when the verdict came from real C&C data, not type math. */
+  real?: RealMatchupSignal;
 }
 
 export type TabId = "home" | "database" | "teams" | "tools";

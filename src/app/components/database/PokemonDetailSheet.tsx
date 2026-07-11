@@ -1,5 +1,7 @@
 import { getSpecies } from "../../../data/speciesLexicon";
+import type { SmogonStore, SmogonTierId } from "../../../lib/smogon";
 import type { DetailStateLike } from "./detailTypes";
+import { SmogonSections } from "./SmogonSections";
 import { getSpriteUrl } from "../../../lib/sprites";
 import type { NamedPct } from "../../../types";
 import { AnimatedPct } from "../shared/AnimatedPct";
@@ -57,10 +59,18 @@ function DetailSkeleton() {
 interface PokemonDetailSheetProps {
   name: string;
   state: DetailStateLike;
+  /** Smogon snapshot store + selected cutoff; sections hide when absent. */
+  smogon?: SmogonStore | null;
+  smogonTier?: SmogonTierId;
 }
 
 /** Pikalytics-style per-Pokémon breakdown rendered inside a BottomSheet. */
-export function PokemonDetailSheet({ name, state }: PokemonDetailSheetProps) {
+export function PokemonDetailSheet({
+  name,
+  state,
+  smogon,
+  smogonTier = "all",
+}: PokemonDetailSheetProps) {
   const { detail, loading, error } = state;
   const species = getSpecies(name);
 
@@ -118,6 +128,10 @@ export function PokemonDetailSheet({ name, state }: PokemonDetailSheetProps) {
                 )}
               </p>
             </section>
+          )}
+
+          {smogon && (
+            <SmogonSections name={name} tier={smogonTier} store={smogon} />
           )}
 
           <BarSection title="Moves" items={detail.moves} limit={8} />

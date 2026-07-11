@@ -42,4 +42,8 @@ export const metaCache = {
     idbSet(`detail:${formatCode}:${detail.name.toLowerCase()}`, detail),
   getRosters: () => idbGet<Roster[]>("rosters:v1"),
   setRosters: (rosters: Roster[]) => idbSet("rosters:v1", rosters),
+  // Monthly Smogon snapshots are immutable once published — cached forever.
+  getSmogonMonth: <T>(month: string) => idbGet<T>(`smogon:${month}`),
+  setSmogonMonth: (month: string, snapshot: unknown) =>
+    idbSet(`smogon:${month}`, snapshot),
 };

@@ -28,6 +28,29 @@ Vite prints the local URL (default `http://localhost:5173`).
 > ~monthly, so upstream traffic is negligible). If the fetch fails, the app
 > boots from its IndexedDB snapshot with honest Stale/Offline states.
 
+## Smogon data layer (v1.5, zero backend)
+
+Monthly Showdown ladder stats complement the Pikalytics live data with
+what its API doesn't expose: **spread distributions**, **Checks &
+Counters** matrices, and **lead usage**.
+
+- `scripts/build-smogon-snapshot.mjs [YYYY-MM]` downloads the chaos JSON
+  (cutoffs 0 "all ladder" + 1760 "top ladder") and leads reports for
+  `gen9championsvgc2026regmb`, trims to app-rendered fields, and writes
+  `public/snapshots/smogon/YYYY-MM.json` (+ `index.json`). ~60 KB gz/month.
+- `.github/workflows/smogon-snapshot.yml` runs it on the 6th (retry the
+  9th) monthly and commits; it also deploys to Vercel when the
+  `VERCEL_TOKEN` repo secret exists. Old months are never deleted — the
+  species usage-trend sparkline grows as history accrues.
+- In-app: Database detail sheets show spread distribution, C&C (with
+  KO/switch % and sample size), and lead usage; the threat matrix upgrades
+  cells with real C&C evidence (tagged with a dot, explained in the cell
+  sheet). Every Smogon number carries a "Showdown · Month YYYY · tier"
+  label — ladder data, not cartridge, and C&C always reads the all-ladder
+  tier (top-cutoff samples are too thin).
+- Season 4 rollover (Sept 2, 2026): update `src/config.ts` AND the format
+  constant in the script.
+
 ## Deploy
 
 `npx vercel deploy --prod` from the repo root (project: `champions-analyzer`,

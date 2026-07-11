@@ -1,7 +1,8 @@
 import { useCallback, useMemo, useState } from "react";
 import { ACTIVE_TEAM, OPPONENT_TEAM } from "../data/teams";
 import { getSpecies } from "../data/speciesLexicon";
-import { evaluateMatchup } from "../lib/matchup";
+import { blendWithRealData, evaluateMatchup } from "../lib/matchup";
+import { useSmogon } from "./useSmogon";
 import type { MatchupCellResult, Pokemon } from "../types";
 
 export interface SelectedMatchup {
@@ -24,12 +25,21 @@ export function useMatchupAnalysis() {
   );
   const [pickerOpen, setPickerOpen] = useState(false);
 
+  const smogon = useSmogon();
+
+  // Type math everywhere; upgraded per-cell with real C&C evidence where
+  // the Smogon snapshot has the pairing (cell gets tagged via `real`).
   const matrix = useMemo(
     () =>
       ACTIVE_TEAM.map((mine) =>
-        opponentTeam.map((theirs) => evaluateMatchup(mine, theirs)),
+        opponentTeam.map((theirs) => {
+          const base = evaluateMatchup(mine, theirs);
+          return smogon && smogon.months.length > 0
+            ? blendWithRealData(base, mine, theirs, smogon)
+            : base;
+        }),
       ),
-    [opponentTeam],
+    [opponentTeam, smogon],
   );
 
   const selectCell = useCallback((row: number, col: number) => {

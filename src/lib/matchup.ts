@@ -1,4 +1,5 @@
 import { TYPE_CHART } from "../data/typeChart";
+import type { SmogonStore } from "./smogon";
 import type { MatchupCellResult, Pokemon, TypeName } from "../types";
 
 /**
@@ -40,4 +41,41 @@ export function evaluateMatchup(
 
 export function formatMultiplier(value: number): string {
   return `${value % 1 === 0 ? value : value.toFixed(2).replace(/0+$/, "")}x`;
+}
+
+/**
+ * Upgrade a type-math verdict with real Checks & Counters evidence where
+ * the pairing appears in the Smogon data (all-ladder tier — see smogon.ts).
+ * A qualifying C&C entry means "reliably KOs or forces out" (Smogon score
+ * p−4d > 0, n ≥ 20), so it overrides type math; when both directions
+ * qualify (mutual pressure), the higher score wins. Cells that used real
+ * data carry `real` so the grid can tag them and the detail sheet can
+ * explain the evidence.
+ */
+export function blendWithRealData(
+  base: MatchupCellResult,
+  mine: Pokemon,
+  theirs: Pokemon,
+  smogon: SmogonStore,
+): MatchupCellResult {
+  // counters(X) lists what beats X.
+  const mineBeatsTheirs = smogon
+    .counters(theirs.name)
+    .find((c) => c.name.toUpperCase() === mine.name.toUpperCase());
+  const theirsBeatsMine = smogon
+    .counters(mine.name)
+    .find((c) => c.name.toUpperCase() === theirs.name.toUpperCase());
+
+  const winner =
+    (mineBeatsTheirs?.score ?? 0) >= (theirsBeatsMine?.score ?? 0)
+      ? mineBeatsTheirs
+      : theirsBeatsMine;
+  if (!winner) return base;
+
+  const favors = winner === mineBeatsTheirs ? "mine" : "theirs";
+  return {
+    ...base,
+    verdict: favors === "mine" ? "Good" : "Bad",
+    real: { favors, p: winner.p, n: winner.n, score: winner.score },
+  };
 }

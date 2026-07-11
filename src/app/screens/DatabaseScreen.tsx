@@ -2,7 +2,9 @@ import { useState } from "react";
 import { RefreshCw, Search } from "lucide-react";
 import { useMetaData } from "../../hooks/useMetaData";
 import { usePokemonDetail } from "../../hooks/usePokemonDetail";
+import { useSmogon } from "../../hooks/useSmogon";
 import { useUsageSearch, type UsageSort } from "../../hooks/useUsageSearch";
+import { TIER_LABELS, type SmogonTierId } from "../../lib/smogon";
 import { PokemonDetailSheet } from "../components/database/PokemonDetailSheet";
 import { UsageRow } from "../components/database/UsageRow";
 import { BottomSheet } from "../components/shared/BottomSheet";
@@ -34,6 +36,9 @@ export function DatabaseScreen() {
   );
   const [selectedName, setSelectedName] = useState<string | null>(null);
   const detailState = usePokemonDetail(selectedName);
+  const smogon = useSmogon();
+  const [smogonTier, setSmogonTier] = useState<SmogonTierId>("all");
+  const hasSmogon = (smogon?.months.length ?? 0) > 0;
 
   return (
     <main className="flex-1 flex flex-col overflow-y-auto px-4">
@@ -66,6 +71,24 @@ export function DatabaseScreen() {
             {label}
           </button>
         ))}
+
+        {/* Smogon cutoff toggle — affects the Showdown-derived sections
+            in the detail sheet (spread distribution, lead usage). */}
+        {hasSmogon &&
+          (["all", "top"] as const).map((tier) => (
+            <button
+              key={tier}
+              onClick={() => setSmogonTier(tier)}
+              title={`Showdown ${TIER_LABELS[tier]} · ${smogon?.monthLabel}`}
+              className={`whitespace-nowrap px-3 py-1.5 rounded-full text-[10px] font-bold tracking-wider uppercase transition-colors border ${
+                smogonTier === tier
+                  ? "bg-[#8B5CF6]/10 text-[#c4b5fd] border-[#8B5CF6]/40"
+                  : "bg-panel text-muted border-white/5 hover:border-white/20"
+              }`}
+            >
+              SD {TIER_LABELS[tier]}
+            </button>
+          ))}
       </div>
 
       {/* Usage list */}
@@ -129,7 +152,12 @@ export function DatabaseScreen() {
         title="Meta Breakdown"
       >
         {selectedName && (
-          <PokemonDetailSheet name={selectedName} state={detailState} />
+          <PokemonDetailSheet
+            name={selectedName}
+            state={detailState}
+            smogon={hasSmogon ? smogon : null}
+            smogonTier={smogonTier}
+          />
         )}
       </BottomSheet>
     </main>

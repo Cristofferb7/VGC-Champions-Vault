@@ -1,6 +1,7 @@
+import { useEffect, useState } from "react";
 import { CheckCircle2, MinusCircle, XCircle, Zap } from "lucide-react";
 import type { SelectedMatchup } from "../../../hooks/useMatchupAnalysis";
-import { bestDamageEstimate, speedTier } from "../../../lib/damage";
+import { useSmogon } from "../../../hooks/useSmogon";
 import { formatMultiplier } from "../../../lib/matchup";
 import type { PokemonDetail } from "../../../types";
 import { SpriteOrb } from "../shared/SpriteOrb";
@@ -12,20 +13,42 @@ const VERDICT_META = {
   Neutral: { Icon: MinusCircle, tone: "text-muted", label: "Even" },
 } as const;
 
+type DamageModule = typeof import("../../../lib/damage");
+
+/**
+ * @smogon/calc ships ~480 kB of gen data — load it only when a cell detail
+ * actually opens, keeping it out of the boot bundle (Lighthouse perf).
+ */
+function useDamageModule(): DamageModule | null {
+  const [mod, setMod] = useState<DamageModule | null>(null);
+  useEffect(() => {
+    let cancelled = false;
+    void import("../../../lib/damage").then((loaded) => {
+      if (!cancelled) setMod(loaded);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+  return mod;
+}
+
 function DamageRow({
+  calc,
   attacker,
   defender,
   attackerDetail,
   defenderDetail,
   tone,
 }: {
+  calc: DamageModule;
   attacker: string;
   defender: string;
   attackerDetail: PokemonDetail | null;
   defenderDetail: PokemonDetail | null;
   tone: string;
 }) {
-  const estimate = bestDamageEstimate(
+  const estimate = calc.bestDamageEstimate(
     attacker,
     attackerDetail,
     defender,
@@ -55,11 +78,13 @@ function DamageRow({
 }
 
 function SpeedStrip({
+  calc,
   mine,
   theirs,
   myDetail,
   theirDetail,
 }: {
+  calc: DamageModule;
   mine: string;
   theirs: string;
   myDetail: PokemonDetail | null;
@@ -67,8 +92,8 @@ function SpeedStrip({
 }) {
   if (!myDetail?.baseStats || !theirDetail?.baseStats) return null;
   const tiers = [
-    { name: mine, tier: speedTier(myDetail.baseStats.spe, myDetail), color: "bg-aura" },
-    { name: theirs, tier: speedTier(theirDetail.baseStats.spe, theirDetail), color: "bg-loss" },
+    { name: mine, tier: calc.speedTier(myDetail.baseStats.spe, myDetail), color: "bg-aura" },
+    { name: theirs, tier: calc.speedTier(theirDetail.baseStats.spe, theirDetail), color: "bg-loss" },
   ];
   const scaleMax = Math.max(...tiers.map(({ tier }) => tier.max)) + 10;
 
@@ -136,6 +161,8 @@ export function MatchupDetail({
   theirDetail,
   detailsLoading,
 }: MatchupDetailProps) {
+  const smogon = useSmogon();
+  const calc = useDamageModule();
   if (!matchup) return null;
 
   const { mine, theirs, result } = matchup;
@@ -151,9 +178,37 @@ export function MatchupDetail({
           </span>
         </div>
         <span className="text-[9px] font-bold uppercase tracking-widest text-muted">
-          Usage-based likelihood
+          {result.real ? "Real ladder data" : "Type math"}
         </span>
       </div>
+
+      {/* Why the cell is tagged with a dot: real C&C evidence */}
+      {result.real && (
+        <div className="mb-3 bg-night/60 rounded-lg border border-aura/20 px-3 py-2">
+          <p className="text-[10px] tracking-wide text-ink">
+            <span className="inline-block w-1.5 h-1.5 rounded-full bg-aura shadow-[0_0_4px_rgba(56,189,248,0.9)] mr-1.5 align-middle" />
+            {result.real.favors === "mine" ? (
+              <>
+                <span className="font-bold uppercase">{mine.name}</span> KOs or
+                forces out <span className="font-bold uppercase">{theirs.name}</span>
+              </>
+            ) : (
+              <>
+                <span className="font-bold uppercase">{theirs.name}</span> KOs or
+                forces out <span className="font-bold uppercase">{mine.name}</span>
+              </>
+            )}{" "}
+            in <span className="font-mono font-bold">{result.real.p}%</span> of{" "}
+            <span className="font-mono">{result.real.n.toLocaleString()}</span>{" "}
+            weighted encounters — this verdict comes from real games, not the
+            type chart.
+          </p>
+          <p className="text-[8px] font-mono text-muted mt-1">
+            Showdown ladder{smogon?.monthLabel ? ` · ${smogon.monthLabel}` : ""} ·
+            all ladder · Smogon score {result.real.score}
+          </p>
+        </div>
+      )}
 
       <div className="flex items-center justify-between">
         {[
@@ -188,7 +243,7 @@ export function MatchupDetail({
             (top usage moves & spreads · Gen 9 approximation)
           </span>
         </h3>
-        {detailsLoading && !myDetail && !theirDetail ? (
+        {(detailsLoading && !myDetail && !theirDetail) || !calc ? (
           <div className="space-y-1.5 animate-pulse">
             <div className="h-3 bg-white/5 rounded w-3/4" />
             <div className="h-3 bg-white/5 rounded w-2/3" />
@@ -196,6 +251,7 @@ export function MatchupDetail({
         ) : (
           <div className="space-y-1.5">
             <DamageRow
+              calc={calc}
               attacker={mine.name}
               defender={theirs.name}
               attackerDetail={myDetail}
@@ -203,6 +259,7 @@ export function MatchupDetail({
               tone="text-win"
             />
             <DamageRow
+              calc={calc}
               attacker={theirs.name}
               defender={mine.name}
               attackerDetail={theirDetail}
@@ -213,14 +270,16 @@ export function MatchupDetail({
         )}
       </section>
 
-      <SpeedStrip
+      {calc && <SpeedStrip
+        calc={calc}
         mine={mine.name}
         theirs={theirs.name}
         myDetail={myDetail}
         theirDetail={theirDetail}
-      />
-      {/* Lead likelihood intentionally absent: the API exposes no lead
-          stats for this format — never fake it (sprint P2). */}
+      />}
+      {/* Per-cell lead likelihood intentionally absent: real lead usage
+          (Smogon leads report) lives in the Database detail sheet; there is
+          still no per-matchup lead stat anywhere — never fake it. */}
     </div>
   );
 }
