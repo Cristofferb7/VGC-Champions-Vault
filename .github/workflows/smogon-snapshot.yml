@@ -18,6 +18,9 @@ permissions:
 jobs:
   snapshot:
     runs-on: ubuntu-latest
+    env:
+      # secrets context is not allowed in step `if`s — route through env.
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
     steps:
       - uses: actions/checkout@v4
 
@@ -45,9 +48,8 @@ jobs:
       # skipped when it isn't set — the snapshot then ships with the next
       # manual `vercel deploy --prod`.
       - name: Deploy to Vercel
-        if: ${{ secrets.VERCEL_TOKEN != '' }}
+        if: env.VERCEL_TOKEN != ''
         env:
-          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
           VERCEL_ORG_ID: team_q4Wggxcq4T0b75XzdzN4Vqme
           VERCEL_PROJECT_ID: prj_5fX90f2jf4E7c8ulGc5BnR3vTJxx
         run: npx vercel deploy --prod --yes --token "$VERCEL_TOKEN"

@@ -57,8 +57,8 @@ Counters** matrices, and **lead usage**.
 framework preset: Vite). `vercel.json` carries the `/pika` rewrite + cache
 headers and the SPA fallback — no serverless functions needed.
 
-Lighthouse (prod, 2026-07-11): **Performance 88 · Accessibility 96 ·
-Best Practices 96 · SEO 92**.
+Lighthouse (prod, 2026-07-11, post v1.5): **Performance 94 · Accessibility 96 ·
+Best Practices 96 · SEO 92** (was perf 88 before the calc chunk went lazy).
 
 ## Mobile path (decided 2026-07-11)
 
