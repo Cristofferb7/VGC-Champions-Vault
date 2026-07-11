@@ -1,0 +1,53 @@
+name: Monthly Smogon snapshot
+
+on:
+  schedule:
+    # Smogon publishes month M stats ~5th of M+1; run on the 6th (and the
+    # 9th as a retry in case publication slips).
+    - cron: "17 6 6 * *"
+    - cron: "17 6 9 * *"
+  workflow_dispatch:
+    inputs:
+      month:
+        description: "Stats month (YYYY-MM); empty = last month"
+        required: false
+
+permissions:
+  contents: write
+
+jobs:
+  snapshot:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Build snapshot
+        run: node scripts/build-smogon-snapshot.mjs ${{ inputs.month }}
+
+      - name: Commit snapshot (if changed)
+        run: |
+          git config user.name "smogon-snapshot-bot"
+          git config user.email "actions@github.com"
+          git add public/snapshots/smogon
+          if git diff --cached --quiet; then
+            echo "No snapshot changes."
+          else
+            git commit -m "chore: Smogon snapshot $(date -u +%Y-%m) run"
+            git push
+          fi
+
+      # Production deploy so the new snapshot goes live. Requires the
+      # VERCEL_TOKEN repo secret (create at vercel.com/account/tokens);
+      # skipped when it isn't set — the snapshot then ships with the next
+      # manual `vercel deploy --prod`.
+      - name: Deploy to Vercel
+        if: ${{ secrets.VERCEL_TOKEN != '' }}
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: team_q4Wggxcq4T0b75XzdzN4Vqme
+          VERCEL_PROJECT_ID: prj_5fX90f2jf4E7c8ulGc5BnR3vTJxx
+        run: npx vercel deploy --prod --yes --token "$VERCEL_TOKEN"
