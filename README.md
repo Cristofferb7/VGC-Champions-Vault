@@ -1,9 +1,15 @@
 # VGC Champions Vault — Matchup Analyzer
 
+**Live: https://champions-analyzer.vercel.app**
+
 Clean Vite + React + TypeScript + Tailwind CSS v4 refactor of the Figma Make
 exports in `../VCG-Champions-Vault/`, following `../CHAMPIONS_ANALYZER_BRIEF.md`
-and `NEXT_SPRINT_INSTRUCTIONS.md`. Mobile-first "competitive HUD" web app,
-now backed by **live Pikalytics data** for the Reg M-B Season 3 format.
+and the per-sprint handoff docs. Mobile-first "competitive HUD" web app,
+backed by **live Pikalytics data** for the Reg M-B Season 3 format.
+
+> Unofficial fan-made tool. Not affiliated with Nintendo, Creatures,
+> GAME FREAK, or The Pokémon Company. Data courtesy of
+> [Pikalytics](https://www.pikalytics.com). Free, no ads, no monetization.
 
 ## Run it
 
@@ -15,11 +21,33 @@ npm run dev
 Vite prints the local URL (default `http://localhost:5173`).
 `npm run build` typechecks and produces `dist/`; `npm run preview` serves it.
 
-> **Data note:** Pikalytics has no CORS headers, so dev traffic goes through
-> the Vite proxy (`/pika` → pikalytics.com, see `vite.config.ts`). A static
-> production deploy won't reach the API — the app then boots from its
-> IndexedDB snapshot and shows honest Stale/Offline states. A real backend
-> replaces the proxy in a later sprint.
+> **Data note:** Pikalytics has no CORS headers. Dev and `vite preview`
+> traffic goes through the Vite proxy (`/pika` → pikalytics.com, see
+> `vite.config.ts`); production uses a Vercel rewrite with CDN caching
+> (`vercel.json`, `CDN-Cache-Control: max-age=86400` — Pikalytics updates
+> ~monthly, so upstream traffic is negligible). If the fetch fails, the app
+> boots from its IndexedDB snapshot with honest Stale/Offline states.
+
+## Deploy
+
+`npx vercel deploy --prod` from the repo root (project: `champions-analyzer`,
+framework preset: Vite). `vercel.json` carries the `/pika` rewrite + cache
+headers and the SPA fallback — no serverless functions needed.
+
+Lighthouse (prod, 2026-07-11): **Performance 88 · Accessibility 96 ·
+Best Practices 96 · SEO 92**.
+
+## Mobile path (decided 2026-07-11)
+
+- **Phase 1 (now):** this Vercel web app + installable PWA. Android installs
+  get the OS **share sheet integration** (share a team-preview screenshot →
+  app opens with OCR results, offline-capable after first use).
+- **Phase 2 (later):** Capacitor 8 wrap of this same `dist/` for the App
+  Store, with a native iOS share extension. Prereq already in place: all
+  IndexedDB access goes through the single `src/lib/metaCache.ts` module,
+  so storage can move to SQLite/Preferences without touching screens.
+- **Not doing:** React Native/Expo rewrite — buys nothing for a
+  data/calculator app.
 
 ## Screens
 
