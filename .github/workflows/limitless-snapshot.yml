@@ -1,0 +1,46 @@
+name: Weekly Limitless snapshot
+
+on:
+  schedule:
+    # Tournaments finish on weekends — ingest Monday mornings (UTC).
+    - cron: "23 7 * * 1"
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  snapshot:
+    runs-on: ubuntu-latest
+    env:
+      # secrets context is not allowed in step `if`s — route through env.
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Ingest tournaments + recluster
+        run: node scripts/build-limitless-snapshot.mjs
+
+      - name: Commit snapshot (if changed)
+        run: |
+          git config user.name "limitless-snapshot-bot"
+          git config user.email "actions@github.com"
+          git add data/limitless public/snapshots/limitless
+          if git diff --cached --quiet; then
+            echo "No new tournaments."
+          else
+            git commit -m "chore: Limitless snapshot $(date -u +%Y-%m-%d)"
+            git push
+          fi
+
+      # Requires the VERCEL_TOKEN repo secret; skipped when unset.
+      - name: Deploy to Vercel
+        if: env.VERCEL_TOKEN != ''
+        env:
+          VERCEL_ORG_ID: team_q4Wggxcq4T0b75XzdzN4Vqme
+          VERCEL_PROJECT_ID: prj_5fX90f2jf4E7c8ulGc5BnR3vTJxx
+        run: npx vercel deploy --prod --yes --token "$VERCEL_TOKEN"
