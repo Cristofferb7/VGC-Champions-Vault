@@ -35,11 +35,21 @@ Vite prints the local URL (default `http://localhost:5173`).
   cached meta list with live weakness + STAB-coverage analysis; saves as a
   roster.
 - **Analyzer** — threat matrix (Good/Bad/Neutral per cell, sticky team column,
-  snap scrolling). Opponent entry via the camera FAB or Edit button (manual
-  picker; screenshot recognition deferred per brief). Cell tap: type math,
-  `@smogon/calc` damage ranges from top-usage moves & spreads (labeled Gen 9
-  approximation), and level-50 speed tiers. Lead likelihood is intentionally
-  absent — the API exposes no lead stats; never faked.
+  snap scrolling). Opponent entry via the camera FAB or Edit button: manual
+  picker, or **screenshot ingestion v1** — drop/paste/pick a clean team-preview
+  screenshot, OCR (tesseract.js, lazy-loaded) fuzzy-corrected against the
+  format species list, confidence-tinted chips, manual picker as correction
+  UI. With a full 6 entered, a **Likely Brings** panel ranks the probable 4
+  from usage + teammate co-occurrence (labeled as a prior, not real bring
+  rates). Cell tap: type math, `@smogon/calc` damage ranges from top-usage
+  moves & spreads (labeled Gen 9 approximation), and level-50 speed tiers.
+  Lead likelihood is intentionally absent — the API exposes no lead stats;
+  never faked.
+- **Share/export** — active-team share button renders a team-sheet PNG
+  (canvas; Web Share on mobile, download on desktop); Showdown-paste export
+  from the team card and each roster's menu.
+- **PWA** — installable (vite-plugin-pwa), offline app shell + IndexedDB
+  snapshot, so it works at events without signal.
 
 ## Architecture
 

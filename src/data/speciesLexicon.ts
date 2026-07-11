@@ -90,6 +90,7 @@ const LEXICON: Record<string, SpeciesInfo> = {
   urshifu: { id: 892, types: ["Fighting", "Dark"] },
   tornadus: { id: 641, types: ["Flying"] },
   amoonguss: { id: 591, types: ["Grass", "Poison"] },
+  toxapex: { id: 748, types: ["Poison", "Water"] },
 };
 
 /**

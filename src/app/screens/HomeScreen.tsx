@@ -1,5 +1,6 @@
 import { useActiveTeam } from "../../hooks/useActiveTeam";
 import { useRosters } from "../../hooks/useRosters";
+import { useTeamShare } from "../../hooks/useTeamShare";
 import { ActiveTeamCard } from "../components/home/ActiveTeamCard";
 import { RosterCarousel } from "../components/home/RosterCarousel";
 
@@ -20,6 +21,7 @@ export function HomeScreen() {
     duplicateRoster,
     removeRoster,
   } = useRosters();
+  const share = useTeamShare(team, record, formatLabel);
 
   return (
     <main className="flex-1 p-4 space-y-8 overflow-y-auto">
@@ -30,6 +32,9 @@ export function HomeScreen() {
         weaknesses={weaknesses}
         expandedWeakness={expandedWeakness}
         onToggleWeakness={toggleWeakness}
+        shareState={share.state}
+        onShareImage={share.shareImage}
+        onCopyPaste={() => share.copyPaste()}
       />
       <RosterCarousel
         rosters={rosters}
@@ -38,6 +43,10 @@ export function HomeScreen() {
         onAdd={addRoster}
         onDuplicate={duplicateRoster}
         onDelete={removeRoster}
+        onCopyPaste={(id) => {
+          const roster = rosters.find((entry) => entry.id === id);
+          if (roster) void share.copyPaste(roster.species);
+        }}
       />
     </main>
   );

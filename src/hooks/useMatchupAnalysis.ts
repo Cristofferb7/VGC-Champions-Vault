@@ -66,6 +66,21 @@ export function useMatchupAnalysis() {
     setOpponentTeam([]);
   }, []);
 
+  /** Replace the whole preview (screenshot recognition applies here). */
+  const setOpponentsByNames = useCallback((names: string[]) => {
+    setSelected(null);
+    setOpponentTeam(
+      names.slice(0, 6).map((name) => {
+        const species = getSpecies(name);
+        return {
+          id: species?.id ?? 0,
+          name: name.toUpperCase(),
+          types: species?.types ?? [],
+        };
+      }),
+    );
+  }, []);
+
   const selectedMatchup: SelectedMatchup | null =
     selected && opponentTeam[selected.col]
       ? {
@@ -85,6 +100,7 @@ export function useMatchupAnalysis() {
     clearSelection,
     toggleOpponent,
     clearOpponents,
+    setOpponentsByNames,
     pickerOpen,
     openPicker: () => setPickerOpen(true),
     closePicker: () => setPickerOpen(false),

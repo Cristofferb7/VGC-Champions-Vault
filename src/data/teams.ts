@@ -24,22 +24,45 @@ export const OPPONENT_TEAM: Pokemon[] = [
 
 /**
  * Seed rosters for first launch only — IndexedDB is the source of truth
- * once the user touches anything (see useRosters).
+ * once the user touches anything (see useRosters). Built from real Reg M-B
+ * archetypes (Pikalytics top cores/teams, 2026-05 snapshot) and named
+ * self-aware so nobody mistakes them for the user's teams.
  */
 export const SEED_ROSTERS: Roster[] = [
   {
     id: 1,
-    name: "TEAM 1",
-    species: ["Gyarados", "Scizor", "Tyranitar", "Heatran", "Cresselia", "Ferrothorn"],
+    name: "SAMPLE CORE",
+    species: [
+      "Charizard-Mega-Y",
+      "Garchomp",
+      "Kingambit",
+      "Whimsicott",
+      "Basculegion",
+      "Incineroar",
+    ],
   },
   {
     id: 2,
-    name: "TEAM 2",
-    species: ["Kyogre", "Umbreon", "Skarmory", "Rotom", "Abra", "Snorlax"],
+    name: "SAMPLE RAIN",
+    species: [
+      "Archaludon",
+      "Pelipper",
+      "Swampert-Mega",
+      "Sinistcha",
+      "Gholdengo",
+      "Milotic",
+    ],
   },
   {
     id: 3,
-    name: "TEAM 3",
-    species: ["Blastoise", "Venusaur", "Charizard", "Pikachu", "Lapras", "Dragonite"],
+    name: "SAMPLE SUN",
+    species: [
+      "Charizard-Mega-Y",
+      "Venusaur",
+      "Farigiraf",
+      "Garchomp",
+      "Incineroar",
+      "Sylveon",
+    ],
   },
 ];

@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { useScrollEdges } from "../../../hooks/useScrollEdges";
 import { getSpriteUrl } from "../../../lib/sprites";
 import type {
@@ -14,6 +15,9 @@ const VERDICT_STYLES: Record<MatchupVerdict, string> = {
 
 /** Width of the sticky "your team" column, used for snap padding + fades. */
 const STICKY_COL_PX = 76;
+/** Grid gap between columns — snap padding must include it, or the snap
+    engine pulls the first column a few px under the sticky column. */
+const GRID_GAP_PX = 4;
 
 interface MatchupGridProps {
   myTeam: Pokemon[];
@@ -39,12 +43,18 @@ export function MatchupGrid({
   const { ref, atStart, atEnd } = useScrollEdges<HTMLDivElement>();
   const gridTemplateColumns = `${STICKY_COL_PX}px repeat(${opponentTeam.length}, 56px)`;
 
+  // Start at the first opponent column — a retained/programmatic scroll
+  // offset was clipping column one under the sticky column (QA round 2).
+  useEffect(() => {
+    if (ref.current) ref.current.scrollLeft = 0;
+  }, [ref, opponentTeam.length]);
+
   return (
     <div className="relative">
       <div
         ref={ref}
         className="overflow-x-auto scrollbar-hide snap-x"
-        style={{ scrollPaddingLeft: STICKY_COL_PX }}
+        style={{ scrollPaddingLeft: STICKY_COL_PX + GRID_GAP_PX }}
       >
         <div className="min-w-max">
           {/* Header row: opponent sprites */}

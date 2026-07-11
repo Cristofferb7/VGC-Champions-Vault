@@ -59,19 +59,42 @@ export function parseFormatIndex(markdown: string): {
 
   const topTeams: TopTeam[] = [];
   for (const line of sectionLines(markdown, "Recent Top Teams")) {
-    // | 1 | JoeUX9 | 14-2 | Tournament Name | Charizard-Mega-Y, Farigiraf, … |
-    const match = line.match(
-      /^\|\s*(\d+)\s*\|\s*(.+?)\s*\|\s*([\d-]+)\s*\|\s*(.+?)\s*\|\s*(.+?)\s*\|/,
-    );
-    if (!match) continue;
-    const [, rank, author, record, event, speciesList] = match;
-    if (author === "Author") continue; // table header
+    // | 1 | JoeUX9 | 14-2 | Maddo's Cup #9 \| 100€ \| Reg M-B | Swampert-Mega, … |
+    // Tournament titles contain escaped pipes — split only on unescaped |.
+    if (!line.trimStart().startsWith("|")) continue;
+    const cells = line
+      .split(/(?<!\\)\|/)
+      .map((cell) => cell.replace(/\\\|/g, "|").trim())
+      .filter((cell) => cell !== "");
+    if (cells.length < 5) continue;
+
+    const [rank, author, record, ...rest] = cells;
+    if (!/^\d+$/.test(rank) || !/^\d+-\d+(-\d+)?$/.test(record)) continue;
+
+    // Species are always the last cell; anything between is the title
+    // (rejoined in case an unescaped pipe still slipped through).
+    const speciesCell = rest[rest.length - 1];
+    const event = rest
+      .slice(0, -1)
+      .join(" | ")
+      .replace(/["\\\s]+$/, "");
+
+    const species = speciesCell
+      .split(",")
+      .map((name) => name.trim())
+      // Real species tokens contain letters; drop numbers/currency junk.
+      .filter((name) => /^[\p{L}][\p{L}\d'’. :-]{2,}$/u.test(name));
+
+    // A registered team has 6 members; fewer means the row is corrupt —
+    // skip it rather than render broken orbs (QA round 2).
+    if (species.length < 6) continue;
+
     topTeams.push({
       rank: Number.parseInt(rank, 10),
       author,
       event,
       ...parseRecord(record),
-      species: speciesList.split(",").map((name) => name.trim()).filter(Boolean),
+      species,
     });
   }
 

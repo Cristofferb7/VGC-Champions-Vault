@@ -1,5 +1,6 @@
 import { AnimatePresence, motion } from "motion/react";
 import { MetaDataProvider, useMetaData } from "../hooks/useMetaData";
+import { RostersProvider } from "../hooks/useRosters";
 import { useNavigation } from "../hooks/useNavigation";
 import type { TabId } from "../types";
 import { AppHeader } from "./components/layout/AppHeader";
@@ -41,8 +42,14 @@ function AppShell() {
           custom={direction}
           variants={{
             enter: (dir: number) => ({ opacity: 0, x: 32 * dir }),
-            center: { opacity: 1, x: 0 },
-            exit: (dir: number) => ({ opacity: 0, x: -32 * dir }),
+            center: { opacity: 1, x: 0, pointerEvents: "auto" },
+            // pointerEvents none immediately: taps mid-transition must not
+            // land on the outgoing screen (QA round 2).
+            exit: (dir: number) => ({
+              opacity: 0,
+              x: -32 * dir,
+              pointerEvents: "none",
+            }),
           }}
           initial="enter"
           animate="center"
@@ -66,7 +73,9 @@ function AppShell() {
 export default function App() {
   return (
     <MetaDataProvider>
-      <AppShell />
+      <RostersProvider>
+        <AppShell />
+      </RostersProvider>
     </MetaDataProvider>
   );
 }

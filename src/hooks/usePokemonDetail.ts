@@ -1,7 +1,5 @@
 import { useEffect, useState } from "react";
-import { FORMAT_CODE, SNAPSHOT_TTL_MS } from "../config";
-import { metaCache } from "../lib/metaCache";
-import { fetchPokemonDetail } from "../lib/pikalytics";
+import { loadDetailCached } from "../lib/detailLoader";
 import type { PokemonDetail } from "../types";
 
 interface DetailState {
@@ -28,25 +26,8 @@ export function usePokemonDetail(name: string | null): DetailState {
     setState({ detail: null, loading: true, error: false });
 
     (async () => {
-      const cached = await metaCache
-        .getDetail(FORMAT_CODE, name)
-        .catch(() => null);
-      if (cancelled) return;
-
-      if (cached && Date.now() - cached.fetchedAt < SNAPSHOT_TTL_MS) {
-        setState({ detail: cached, loading: false, error: false });
-        return;
-      }
-      if (cached) setState({ detail: cached, loading: true, error: false });
-
-      try {
-        const fresh = await fetchPokemonDetail(name);
-        await metaCache.setDetail(FORMAT_CODE, fresh).catch(() => {});
-        if (!cancelled) setState({ detail: fresh, loading: false, error: false });
-      } catch {
-        if (!cancelled)
-          setState({ detail: cached, loading: false, error: !cached });
-      }
+      const detail = await loadDetailCached(name);
+      if (!cancelled) setState({ detail, loading: false, error: !detail });
     })();
 
     return () => {

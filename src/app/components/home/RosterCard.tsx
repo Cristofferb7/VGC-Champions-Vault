@@ -1,4 +1,4 @@
-import { Copy, MoreVertical, Trash2 } from "lucide-react";
+import { ClipboardCopy, Copy, MoreVertical, Trash2 } from "lucide-react";
 import { getSpecies } from "../../../data/speciesLexicon";
 import { useLongPress } from "../../../hooks/useLongPress";
 import { getSpriteUrl } from "../../../lib/sprites";
@@ -13,6 +13,7 @@ interface RosterCardProps {
   onCloseMenu: () => void;
   onDuplicate: () => void;
   onDelete: () => void;
+  onCopyPaste: () => void;
 }
 
 /**
@@ -28,6 +29,7 @@ export function RosterCard({
   onCloseMenu,
   onDuplicate,
   onDelete,
+  onCopyPaste,
 }: RosterCardProps) {
   const longPress = useLongPress(onOpenMenu);
 
@@ -103,6 +105,13 @@ export function RosterCard({
           >
             <Copy size={12} />
             <span>Duplicate</span>
+          </button>
+          <button
+            onClick={onCopyPaste}
+            className="w-full flex items-center space-x-2 px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-ink hover:bg-white/5 transition-colors"
+          >
+            <ClipboardCopy size={12} />
+            <span>Copy paste</span>
           </button>
           <button
             onClick={onDelete}

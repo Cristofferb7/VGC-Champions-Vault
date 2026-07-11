@@ -1,6 +1,16 @@
-import { AlertTriangle, Download, Share } from "lucide-react";
+import { AlertTriangle, Check, Download, Loader2, Share, X } from "lucide-react";
 import { formatMultiplier } from "../../../lib/matchup";
 import type { Pokemon, TeamWeakness, TypeName } from "../../../types";
+
+const SHARE_ICONS = {
+  idle: Share,
+  working: Loader2,
+  shared: Check,
+  copied: Check,
+  error: X,
+} as const;
+
+export type ShareState = keyof typeof SHARE_ICONS;
 import { SpriteOrb } from "../shared/SpriteOrb";
 import { TypeBadge } from "../shared/TypeBadge";
 
@@ -11,6 +21,9 @@ interface ActiveTeamCardProps {
   weaknesses: TeamWeakness[];
   expandedWeakness: TypeName | null;
   onToggleWeakness: (type: TypeName) => void;
+  shareState: ShareState;
+  onShareImage: () => void;
+  onCopyPaste: () => void;
 }
 
 export function ActiveTeamCard({
@@ -20,7 +33,11 @@ export function ActiveTeamCard({
   weaknesses,
   expandedWeakness,
   onToggleWeakness,
+  shareState,
+  onShareImage,
+  onCopyPaste,
 }: ActiveTeamCardProps) {
+  const ShareIcon = SHARE_ICONS[shareState];
   const expanded = weaknesses.find((w) => w.type === expandedWeakness);
 
   return (
@@ -54,16 +71,36 @@ export function ActiveTeamCard({
             <div className="flex flex-col items-end space-y-2">
               <div className="flex items-center space-x-2">
                 <button
-                  aria-label="Share team"
-                  className="flex items-center justify-center p-1.5 bg-night rounded-lg border border-white/5 text-muted shadow-sm"
+                  aria-label="Share team sheet image"
+                  title="Share / download team-sheet image"
+                  onClick={onShareImage}
+                  disabled={shareState === "working"}
+                  className={`flex items-center justify-center p-1.5 bg-night rounded-lg border border-white/5 shadow-sm transition-colors hover:text-ink ${
+                    shareState === "shared"
+                      ? "text-win"
+                      : shareState === "error"
+                        ? "text-loss"
+                        : "text-muted"
+                  }`}
                 >
-                  <Share size={14} />
+                  <ShareIcon
+                    size={14}
+                    className={shareState === "working" ? "animate-spin" : ""}
+                  />
                 </button>
                 <button
-                  aria-label="Export team"
-                  className="flex items-center justify-center p-1.5 bg-night rounded-lg border border-white/5 text-muted shadow-sm"
+                  aria-label="Copy Showdown paste"
+                  title="Copy team as Showdown paste"
+                  onClick={onCopyPaste}
+                  className={`flex items-center justify-center p-1.5 bg-night rounded-lg border border-white/5 shadow-sm transition-colors hover:text-ink ${
+                    shareState === "copied" ? "text-win" : "text-muted"
+                  }`}
                 >
-                  <Download size={14} />
+                  {shareState === "copied" ? (
+                    <Check size={14} />
+                  ) : (
+                    <Download size={14} />
+                  )}
                 </button>
               </div>
 

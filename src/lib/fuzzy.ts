@@ -19,6 +19,39 @@ export function fuzzyScore(query: string, candidate: string): number {
   return 20 - c.length;
 }
 
+/** Classic edit distance — used to correct OCR output against the lexicon. */
+export function levenshtein(a: string, b: string): number {
+  const rows = a.length + 1;
+  const cols = b.length + 1;
+  const dist = Array.from({ length: rows }, (_, i) => {
+    const row = new Array<number>(cols).fill(0);
+    row[0] = i;
+    return row;
+  });
+  for (let j = 0; j < cols; j++) dist[0][j] = j;
+
+  for (let i = 1; i < rows; i++) {
+    for (let j = 1; j < cols; j++) {
+      const cost = a[i - 1] === b[j - 1] ? 0 : 1;
+      dist[i][j] = Math.min(
+        dist[i - 1][j] + 1,
+        dist[i][j - 1] + 1,
+        dist[i - 1][j - 1] + cost,
+      );
+    }
+  }
+  return dist[a.length][b.length];
+}
+
+/** 0–1 similarity between an OCR token and a candidate name. */
+export function similarity(a: string, b: string): number {
+  const left = a.toLowerCase().trim();
+  const right = b.toLowerCase().trim();
+  if (!left || !right) return 0;
+  const distance = levenshtein(left, right);
+  return 1 - distance / Math.max(left.length, right.length);
+}
+
 export function fuzzyFilter<T>(
   query: string,
   items: T[],

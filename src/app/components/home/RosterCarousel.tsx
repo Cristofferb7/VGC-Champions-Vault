@@ -10,6 +10,7 @@ interface RosterCarouselProps {
   onAdd: () => void;
   onDuplicate: (id: number) => void;
   onDelete: (id: number) => void;
+  onCopyPaste: (id: number) => void;
 }
 
 export function RosterCarousel({
@@ -19,6 +20,7 @@ export function RosterCarousel({
   onAdd,
   onDuplicate,
   onDelete,
+  onCopyPaste,
 }: RosterCarouselProps) {
   const [menuRosterId, setMenuRosterId] = useState<number | null>(null);
 
@@ -51,6 +53,10 @@ export function RosterCarousel({
             }}
             onDelete={() => {
               onDelete(roster.id);
+              setMenuRosterId(null);
+            }}
+            onCopyPaste={() => {
+              onCopyPaste(roster.id);
               setMenuRosterId(null);
             }}
           />

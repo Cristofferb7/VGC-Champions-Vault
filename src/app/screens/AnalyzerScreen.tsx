@@ -1,11 +1,16 @@
-import { useEffect } from "react";
+import { useCallback, useEffect, useMemo } from "react";
 import { Camera, Pencil } from "lucide-react";
+import { useBringLikelihood } from "../../hooks/useBringLikelihood";
 import { useMatchupAnalysis } from "../../hooks/useMatchupAnalysis";
 import { useMetaData } from "../../hooks/useMetaData";
 import { usePokemonDetail } from "../../hooks/usePokemonDetail";
+import { useScreenshotRecognition } from "../../hooks/useScreenshotRecognition";
+import type { RecognizedSlot } from "../../lib/recognition";
+import { BringPanel } from "../components/analyzer/BringPanel";
 import { MatchupDetail } from "../components/analyzer/MatchupDetail";
 import { MatchupGrid } from "../components/analyzer/MatchupGrid";
 import { OpponentPicker } from "../components/analyzer/OpponentPicker";
+import { ScreenshotDrop } from "../components/analyzer/ScreenshotDrop";
 import { BottomSheet } from "../components/shared/BottomSheet";
 
 interface AnalyzerScreenProps {
@@ -23,6 +28,7 @@ export function AnalyzerScreen({ captureSignal = 0 }: AnalyzerScreenProps) {
     clearSelection,
     toggleOpponent,
     clearOpponents,
+    setOpponentsByNames,
     pickerOpen,
     openPicker,
     closePicker,
@@ -31,6 +37,22 @@ export function AnalyzerScreen({ captureSignal = 0 }: AnalyzerScreenProps) {
 
   const myDetail = usePokemonDetail(selectedMatchup?.mine.name ?? null);
   const theirDetail = usePokemonDetail(selectedMatchup?.theirs.name ?? null);
+
+  const candidates = useMemo(
+    () => (snapshot?.entries ?? []).map((entry) => entry.name),
+    [snapshot],
+  );
+  const applyRecognition = useCallback(
+    (slots: RecognizedSlot[]) =>
+      setOpponentsByNames(slots.map((slot) => slot.name)),
+    [setOpponentsByNames],
+  );
+  const recognition = useScreenshotRecognition(
+    candidates,
+    applyRecognition,
+    pickerOpen, // ⌘V works whenever opponent entry is open
+  );
+  const brings = useBringLikelihood(opponentTeam, snapshot?.entries ?? []);
 
   useEffect(() => {
     if (captureSignal > 0) openPicker();
@@ -112,6 +134,10 @@ export function AnalyzerScreen({ captureSignal = 0 }: AnalyzerScreenProps) {
         )}
       </section>
 
+      {brings.complete && (
+        <BringPanel estimates={brings.estimates} loading={brings.loading} />
+      )}
+
       <BottomSheet
         open={selectedMatchup !== null}
         onClose={clearSelection}
@@ -130,6 +156,11 @@ export function AnalyzerScreen({ captureSignal = 0 }: AnalyzerScreenProps) {
         onClose={closePicker}
         title="Opponent Team Entry"
       >
+        <ScreenshotDrop
+          status={recognition.status}
+          slots={recognition.slots}
+          onImage={recognition.processImage}
+        />
         <OpponentPicker
           entries={snapshot?.entries ?? []}
           opponentTeam={opponentTeam}
