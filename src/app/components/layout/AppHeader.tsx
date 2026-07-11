@@ -43,11 +43,13 @@ export function AppHeader({
     <header className="sticky top-0 z-50 bg-night/95 backdrop-blur-md border-b border-panel h-14 px-4 flex items-center justify-between">
       {pill ? (
         <div
-          title={`Meta data cache state · ${persistNote}`}
+          title={`${pill.label} · meta data cache state · ${persistNote}`}
           className={`flex items-center space-x-1 px-2 py-1 rounded-full border z-10 ${pill.tone}`}
         >
           <pill.Icon size={12} className={pill.spin ? "animate-spin" : ""} />
-          <span className="text-[10px] font-bold tracking-wider uppercase mt-[1px]">
+          {/* <420px: icon-only pill so the title never truncates (s7 QA);
+              the label stays available in the tooltip. */}
+          <span className="max-[419px]:hidden text-[10px] font-bold tracking-wider uppercase mt-[1px]">
             {pill.label}
           </span>
         </div>
@@ -57,7 +59,7 @@ export function AppHeader({
 
       <div
         className={`absolute left-0 right-0 flex justify-center pointer-events-none ${
-          pill ? "px-28" : "px-10"
+          pill ? "px-28 max-[419px]:px-14" : "px-10"
         }`}
       >
         <h1 className="text-[13px] font-bold tracking-widest uppercase text-ink truncate">

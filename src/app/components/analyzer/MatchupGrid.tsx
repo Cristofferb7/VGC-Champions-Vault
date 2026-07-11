@@ -53,7 +53,7 @@ export function MatchupGrid({
     <div className="relative">
       <div
         ref={ref}
-        className="overflow-x-auto scrollbar-hide snap-x"
+        className="overflow-x-auto scrollbar-hide snap-x [touch-action:pan-x_pan-y] overscroll-x-contain"
         style={{ scrollPaddingLeft: STICKY_COL_PX + GRID_GAP_PX }}
       >
         <div className="min-w-max">

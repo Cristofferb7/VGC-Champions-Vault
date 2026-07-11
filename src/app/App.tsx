@@ -46,7 +46,13 @@ function AppShell() {
   }, []);
 
   return (
-    <div className="mx-auto w-full max-w-[430px] min-h-screen bg-night text-ink font-sans pb-[168px] flex flex-col overflow-x-hidden relative sm:border-x sm:border-white/10 sm:shadow-[0_0_80px_rgba(56,189,248,0.07)]">
+    // min-h-dvh (not vh): iOS Safari's vh includes collapsed browser
+    // chrome, which painted a dead band above the nav (sprint 7 QA).
+    // Bottom padding = nav 72 + FAB overlap 72 + home-indicator inset.
+    <div
+      className="mx-auto w-full max-w-[430px] min-h-dvh bg-night text-ink font-sans flex flex-col overflow-x-hidden relative sm:border-x sm:border-white/10 sm:shadow-[0_0_80px_rgba(56,189,248,0.07)]"
+      style={{ paddingBottom: "calc(144px + env(safe-area-inset-bottom))" }}
+    >
       <AppHeader
         title={title}
         syncStatus={showSyncPill ? status : undefined}

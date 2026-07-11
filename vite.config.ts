@@ -15,6 +15,9 @@ export default defineConfig({
       srcDir: 'src',
       filename: 'sw.ts',
       registerType: 'autoUpdate',
+      // main.tsx registers explicitly (with a reload on controllerchange
+      // so deploys reach open tabs) — don't also auto-inject a register.
+      injectRegister: false,
       includeAssets: ['icon.svg', 'icon-192.png', 'icon-512.png'],
       manifest: {
         name: 'VGC Champions Vault',

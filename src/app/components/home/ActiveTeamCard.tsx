@@ -104,27 +104,33 @@ export function ActiveTeamCard({
                 </button>
               </div>
 
-              {/* Shared weaknesses: "TYPE ×N MONS" = N members hit super-effectively */}
-              <div className="flex flex-col items-end gap-1">
-                {weaknesses.map(({ type, members }) => (
-                  <button
-                    key={type}
-                    onClick={() => onToggleWeakness(type)}
-                    className={`flex items-center px-2 py-1 rounded border transition-colors ${
-                      expandedWeakness === type
-                        ? "bg-warn/25 text-warn border-warn/60"
-                        : "bg-warn/10 text-warn border-warn/30"
-                    }`}
-                  >
-                    <AlertTriangle size={10} className="mr-1.5" />
-                    <span className="text-[9px] font-bold uppercase tracking-widest">
-                      {type} ×{members.length} mons
-                    </span>
-                  </button>
-                ))}
-              </div>
             </div>
           </div>
+
+          {/* Shared weaknesses ("TYPE ×N MONS" = N members hit super-
+              effectively): one horizontal scrollable row under the W/L
+              line — the old right-side vertical stack made the card
+              needlessly tall on phones (sprint 7 QA). */}
+          {weaknesses.length > 0 && (
+            <div className="flex gap-1.5 overflow-x-auto scrollbar-hide [touch-action:pan-x_pan-y] mb-2">
+              {weaknesses.map(({ type, members }) => (
+                <button
+                  key={type}
+                  onClick={() => onToggleWeakness(type)}
+                  className={`flex items-center flex-shrink-0 px-2 py-1 rounded border transition-colors ${
+                    expandedWeakness === type
+                      ? "bg-warn/25 text-warn border-warn/60"
+                      : "bg-warn/10 text-warn border-warn/30"
+                  }`}
+                >
+                  <AlertTriangle size={10} className="mr-1.5" />
+                  <span className="text-[9px] font-bold uppercase tracking-widest whitespace-nowrap">
+                    {type} ×{members.length} mons
+                  </span>
+                </button>
+              ))}
+            </div>
+          )}
 
           {/* Expanded weakness: who's affected and how hard */}
           {expanded && (
@@ -145,8 +151,9 @@ export function ActiveTeamCard({
 
           <div className="mb-5 pb-1 border-b border-white/5" />
 
-          {/* 3x2 team grid */}
-          <div className="grid grid-cols-3 gap-y-6 gap-x-2">
+          {/* Team grid: 2-col under 400px so type badges never wrap
+              mid-mon (3 starved columns at 390px — sprint 7 QA). */}
+          <div className="grid grid-cols-2 min-[400px]:grid-cols-3 gap-y-6 gap-x-2">
             {team.map((poke) => (
               <div key={poke.id} className="flex flex-col items-center">
                 <div className="mb-2">

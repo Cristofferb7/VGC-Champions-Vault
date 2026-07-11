@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Plus } from "lucide-react";
 import type { Roster } from "../../../types";
 import { RosterCard } from "./RosterCard";
@@ -23,6 +23,19 @@ export function RosterCarousel({
   onCopyPaste,
 }: RosterCarouselProps) {
   const [menuRosterId, setMenuRosterId] = useState<number | null>(null);
+  const scroller = useRef<HTMLDivElement>(null);
+
+  // Start at the first card. Chrome restores element scroll positions
+  // ASYNCHRONOUSLY after a reload, so a mount-time reset alone gets
+  // overridden — reset again shortly after (found in sprint 7 QA pass).
+  useEffect(() => {
+    const reset = () => {
+      if (scroller.current) scroller.current.scrollLeft = 0;
+    };
+    reset();
+    const timer = window.setTimeout(reset, 150);
+    return () => window.clearTimeout(timer);
+  }, []);
 
   return (
     <section>
@@ -37,7 +50,14 @@ export function RosterCarousel({
       </h2>
 
       {/* Horizontal carousel */}
-      <div className="flex space-x-4 overflow-x-auto pb-4 scrollbar-hide snap-x pr-4">
+      {/* pan-x pan-y (NOT bare pan-x, which would block vertical page
+          scrolls starting here): browser axis-locks so horizontal swipes
+          scroll the carousel, vertical ones the page — never both. The
+          contained overscroll stops edge-fling chaining (sprint 7). */}
+      <div
+        ref={scroller}
+        className="flex space-x-4 overflow-x-auto pb-4 scrollbar-hide snap-x pr-4 [touch-action:pan-x_pan-y] overscroll-x-contain"
+      >
         {rosters.map((roster) => (
           <RosterCard
             key={roster.id}
@@ -65,7 +85,7 @@ export function RosterCarousel({
         {/* Add-team card */}
         <button
           onClick={onAdd}
-          className="snap-start min-w-[140px] h-[110px] border-2 border-dashed border-muted/40 rounded-xl flex flex-col items-center justify-center text-muted bg-panel/50 transition-all hover:border-muted/70 hover:text-ink flex-shrink-0"
+          className="snap-start min-w-[140px] h-[188px] border-2 border-dashed border-muted/40 rounded-xl flex flex-col items-center justify-center text-muted bg-panel/50 transition-all hover:border-muted/70 hover:text-ink flex-shrink-0"
         >
           <div className="w-10 h-10 rounded-full bg-night flex items-center justify-center mb-2 shadow-inner">
             <Plus size={24} />

@@ -4,7 +4,7 @@ Vite 6 + React 18 + TypeScript + Tailwind 4 + motion. Mobile-first "competitive 
 
 ## ➤ CURRENT ASSIGNMENT
 
-**Read `SPRINT_6_HANDOFF.md` and work through it top to bottom.** (Sprint 5 passed Cowork QA on prod in full — drag fix, Smogon layer, matrix evidence dots all verified. Sprint 6 = QA nits + Limitless ingest + archetype clustering.)
+**Read `SPRINT_7_HANDOFF.md` and work through it top to bottom.** (Sprint 6 passed QA — archetypes verified on prod and on the user's iPhone. Sprint 7 is UI-only mobile polish of the Home screen from real-device feedback: viewport dead band, roster carousel, header truncation, SW update lag. No new features.)
 
 ## Standing workflow (do not change)
 

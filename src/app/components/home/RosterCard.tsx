@@ -18,7 +18,9 @@ interface RosterCardProps {
 
 /**
  * One saved-roster card. Edit menu opens via kebab button, right-click
- * (desktop), or long press (touch).
+ * (desktop), or long press (touch). Sized ~72vw on phones (capped for the
+ * 430px column) so one card + a peek of the next is visible; touch-callout
+ * suppressed so iOS long-press opens our menu, not the image-save sheet.
  */
 export function RosterCard({
   roster,
@@ -44,7 +46,8 @@ export function RosterCard({
         onOpenMenu();
       }}
       {...longPress}
-      className={`relative snap-start min-w-[200px] h-[110px] bg-panel rounded-xl p-3 flex flex-col shadow-md text-left transition-colors border cursor-pointer select-none ${
+      style={{ WebkitTouchCallout: "none" }}
+      className={`relative snap-start w-[min(72vw,280px)] flex-shrink-0 h-[188px] bg-panel rounded-xl p-3 flex flex-col shadow-md text-left transition-colors border cursor-pointer select-none ${
         isSelected ? "border-aura/60" : "border-white/5 hover:border-white/15"
       }`}
     >
@@ -52,19 +55,21 @@ export function RosterCard({
         <h3 className="text-sm font-bold text-ink uppercase tracking-wide">
           {roster.name}
         </h3>
+        {/* 44pt touch target (negative margin keeps the visual compact) */}
         <button
           aria-label={`Edit ${roster.name}`}
           onClick={(e) => {
             e.stopPropagation();
             menuOpen ? onCloseMenu() : onOpenMenu();
           }}
-          className="p-0.5 -m-0.5 text-muted hover:text-ink transition-colors"
+          className="w-11 h-11 -m-3 flex items-center justify-center text-muted hover:text-ink transition-colors"
         >
-          <MoreVertical size={14} />
+          <MoreVertical size={16} />
         </button>
       </div>
 
-      <div className="grid grid-cols-3 gap-1 bg-night rounded-lg p-2 border border-white/5 flex-1">
+      {/* 3×2 grid that actually fills the card — 48px sprites (sprint 7) */}
+      <div className="grid grid-cols-3 grid-rows-2 gap-1 bg-night rounded-lg p-2 border border-white/5 flex-1">
         {roster.species.length > 0 ? (
           roster.species.map((name, i) => {
             const species = getSpecies(name);
@@ -74,7 +79,9 @@ export function RosterCard({
                   <img
                     src={getSpriteUrl(species.id)}
                     alt={name}
-                    className="w-8 h-8 object-contain opacity-90"
+                    title={name}
+                    draggable={false}
+                    className="w-12 h-12 object-contain opacity-90"
                     onError={(e) =>
                       (e.currentTarget.style.visibility = "hidden")
                     }
@@ -88,7 +95,7 @@ export function RosterCard({
             );
           })
         ) : (
-          <span className="col-span-3 flex items-center justify-center text-[9px] font-bold uppercase tracking-wider text-muted">
+          <span className="col-span-3 row-span-2 flex items-center justify-center text-[9px] font-bold uppercase tracking-wider text-muted">
             Empty slot
           </span>
         )}

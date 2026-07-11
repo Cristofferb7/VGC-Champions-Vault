@@ -11,7 +11,8 @@ export function CameraFab({ onClick }: CameraFabProps) {
       <button
         onClick={onClick}
         aria-label="Analyze a team preview"
-        className="pointer-events-auto absolute bottom-[88px] right-4 w-14 h-14 bg-aura rounded-full flex items-center justify-center shadow-[0_4px_20px_rgba(56,189,248,0.5)] border-2 border-night hover:bg-[#0ea5e9] transition-all active:scale-95"
+        style={{ bottom: "calc(88px + env(safe-area-inset-bottom))" }}
+        className="pointer-events-auto absolute right-4 w-14 h-14 bg-aura rounded-full flex items-center justify-center shadow-[0_4px_20px_rgba(56,189,248,0.5)] border-2 border-night hover:bg-[#0ea5e9] transition-all active:scale-95"
       >
         <Camera size={24} className="text-night fill-current" />
       </button>

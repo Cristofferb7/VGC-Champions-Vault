@@ -17,7 +17,15 @@ export function BottomNav({ activeTab, onNavigate }: BottomNavProps) {
   return (
     // z-60: stays tappable above sheet backdrops (z-50) — navigating
     // while a sheet is open dismisses it in the same gesture.
-    <nav className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[430px] h-[72px] bg-night/95 backdrop-blur-lg border-t border-panel z-[60] flex items-center justify-around px-2 pb-safe shadow-[0_-5px_20px_rgba(0,0,0,0.5)]">
+    // Height grows by the home-indicator inset so the 72px content zone
+    // never gets squeezed on notched phones.
+    <nav
+      className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[430px] bg-night/95 backdrop-blur-lg border-t border-panel z-[60] flex items-center justify-around px-2 shadow-[0_-5px_20px_rgba(0,0,0,0.5)]"
+      style={{
+        height: "calc(72px + env(safe-area-inset-bottom))",
+        paddingBottom: "env(safe-area-inset-bottom)",
+      }}
+    >
       {TABS.map(({ id, label, Icon }) => {
         const isActive = activeTab === id;
         return (
