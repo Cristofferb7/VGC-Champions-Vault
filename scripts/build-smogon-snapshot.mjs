@@ -19,7 +19,7 @@ import { mkdirSync, writeFileSync, readFileSync, existsSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
-const FORMAT = "gen9championsvgc2026regmb";
+const FORMAT = "gen9championsvgc2026regmc";
 const CUTOFFS = { all: 0, top: 1760 };
 const MIN_USAGE = 0.005; // drop sub-0.5% species
 const MIN_CC_N = 20; // C&C rows below this sample size are noise
